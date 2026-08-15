@@ -1,0 +1,31 @@
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# pi runtime state (never commit)
+.codegraph/
+.pi/npm/
+.pi/git/
+.pi/tasks/
+.pi/sessions/
+.pi/sessions.jsonl
+
+# Personal notes / scratch (kept locally, not for repo)
+我的想法.md
+*.tmp
+*.bak
+
+# Backup directories
+backup-*/
+
+# Sensitive (API keys go in ~/.pi/web-search.json, not in repo)
+.env
+.env.local

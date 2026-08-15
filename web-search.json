@@ -1,0 +1,13 @@
+{
+  "provider": "auto",
+  "workflow": "summary-review",
+  "maxInlineContentChars": 30000,
+  "youtube": { "enabled": true },
+  "video": { "enabled": true, "maxSizeMB": 50 },
+  "pdf": { "provider": "auto", "maxSizeMB": 20 },
+  "githubClone": {
+    "enabled": true,
+    "maxRepoSizeMB": 350,
+    "clonePath": "/tmp/pi-github-repos"
+  }
+}
