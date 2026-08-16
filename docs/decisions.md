@@ -189,3 +189,46 @@ grep -E '(sk-|pplx-|gho_|gsk_|ctx7sk_)' ~/.pi/*.json ~/.pi/agent/*.json
 ```
 
 如果是新克隆部署，自己重新生成或跳过。
+
+---
+
+## 决策 9：superpowers 选中文增强版（superpowers-zh）
+
+**选择**：默认装 `npm:superpowers-zh@latest`，英文原版 `git:github.com/obra/superpowers` 留作可切换备选。
+
+**两个选项**：
+
+| 选项 | 来源 | 内容 |
+|---|---|---|
+| 英文原版 | `git:github.com/obra/superpowers` | 上游 `obra/superpowers` 全部 skill（英文） |
+| **中文增强版**（默认） | `npm:superpowers-zh` 或 `git:github.com/jnMetaCode/superpowers-zh` | 上游 14 个 skill 中英对照 + 6 个国内原创 skill：mcp-builder / workflow-runner / chinese-code-review / chinese-git-workflow / chinese-documentation / chinese-commit-conventions |
+
+**Pi 集成方式完全一致**：都在 `package.json` 里声明 `pi` 字段。两条 `pi install` 命令装出来的运行时体验、目录结构、skill 调用入口都一样——只是 skill 内容中文化和扩展。
+
+**为什么默认中文增强版**：
+- skill 描述、SKILL.md、触发提示全中文化，跟 pi 主对话语言一致
+- 6 个国内原创 skill 覆盖国内工程化刚需（中文 commit / 中文文档 / Gitee 等国内 Git 平台 / 中文代码审查 / MCP 构建 / 多 agent workflow）
+- 14 个翻译 skill 用 `brainstorming → TDD → systematic-debugging` 等关键流程技能时，中文描述降低误触发
+
+**切换命令**（任选其一）：
+
+```bash
+# 中文 → 英文
+pi remove npm:superpowers-zh
+pi install git:github.com/obra/superpowers
+
+# 英文 → 中文
+pi remove git:github.com/obra/superpowers
+pi install npm:superpowers-zh@latest
+```
+
+**对本仓库的影响**：
+
+| 文件 | 变化 |
+|---|---|
+| `install-packages.sh` / `deploy.sh` 的 `PKGS` 数组 | `git:github.com/obra/superpowers` → `npm:superpowers-zh@latest`，行尾加注释指向本决策 |
+| git 源数量 | 3 个 → 2 个（少 superpowers，剩 codegraph-pi / pi-lsp-client）。README 安全 checklist 已同步 |
+| 脚本输出 | 完成后打印一行切换提示 |
+| 包总数 | 不变（11 外部 + 3 内置 = 14） |
+
+**前提假设**：用户已经倾向中文工作流。如果团队是英文环境，把默认换回 `git:github.com/obra/superpowers` 即可，所有引用 README 里"决策 9"的交叉引用仍然成立。

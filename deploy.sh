@@ -93,7 +93,7 @@ PKGS=(
   "npm:pi-context-view"
   "npm:pi-system-prompt"
   "npm:pi-context-breakup"
-  "git:github.com/obra/superpowers"
+  "npm:superpowers-zh@latest"   # 中文增强版：14 翻译 + 6 国内原创 skill。英文原版：git:github.com/obra/superpowers（详见 docs/decisions.md 决策 9）
   "git:github.com/nosuiyi/codegraph-pi"
   "git:github.com/code-yeongyu/pi-lsp-client"
   "npm:@upstash/context7-pi@latest"

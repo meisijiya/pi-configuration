@@ -8,7 +8,7 @@
 
 | 层 | 扩展 | 作用 |
 |---|---|---|
-| 方法论 | `obra/superpowers` | brainstorming → plans → TDD → review → 收尾的整套 skill |
+| 方法论 | `superpowers-zh`（默认中文；可切 `obra/superpowers`，见 [决策 9](docs/decisions.md#决策-9superpowers-选中文增强版superpowers-zh)） | brainstorming → plans → TDD → review → 收尾的整套 skill |
 | 代码理解 | `nosuiyi/codegraph-pi` | 预索引代码图谱，4 个 tool（explore / node / search / callers） |
 | LSP | `code-yeongyu/pi-lsp-client` | 40+ 语言服务器，从 omo port 而来 |
 | 文档 | `@upstash/context7-pi` | 拉库文档（resolve-library-id + query-docs） |
@@ -105,7 +105,8 @@ pi-configuration/
 | 决策 | 选择 | 理由 |
 |---|---|---|
 | **npm 版本策略** | `@latest`（不 pin 具体版本） | npm registry 有 cryptographic signature，trust npm 自动滚到最新 |
-| **git 源策略** | 不 pin SHA（用 default branch） | 接受 trust maintainer 的 tradeoff。3 个 git 源都是知名作者 |
+| **git 源策略** | 不 pin SHA（用 default branch） | 接受 trust maintainer 的 tradeoff。2 个 git 源都是知名作者 |
+| **superpowers 版本** | 默认 `superpowers-zh`（中文增强版） | skill 中文化 + 6 个国内原创 skill；可切回 `obra/superpowers`（见 [决策 9](docs/decisions.md#决策-9superpowers-选中文增强版superpowers-zh)） |
 | **npmCommand** | 不设 | bash -c 透传参数有 bug（详见 troubleshooting）；直接靠 nvm 的交互 shell PATH |
 | **任务配置两层** | 全局 baseline + 项目 override | `taskScope: session` 默认；项目里改成 `project` 共享任务 |
 | **MCP 桥接** | `pi-mcp-extension` | pi 本身无 MCP 支持，需要这个中间层 |
@@ -123,7 +124,7 @@ pi-configuration/
 
 ## 安全性
 
-- **3 个 git 源（superpowers / codegraph-pi / pi-lsp-client）** 不 pin SHA，等于 trust GitHub transport + 仓库作者。要更安全，改成 pin SHA（具体 SHA 历史上轮对话里有）。
+- **2 个 git 源（codegraph-pi / pi-lsp-client）** 不 pin SHA，等于 trust GitHub transport + 仓库作者。superpowers 走 npm（`superpowers-zh`），签名校验由 npm registry 处理。要更安全，改成 pin SHA（具体 SHA 历史上轮对话里有）。
 - **API key 走环境变量**：`web-search.json` 用 `$VAR` 引用、`mcp.json` 的 GitHub token 也用 `$GITHUB_TOKEN`。**不要把任何 key 提交进仓库**。
 - **mcp.json 和 web-search.json 部署后是 600 权限**。
 - **pi 包有完整 system access**（pi 官方文档明示）。装第三方包前 review 一下源码。
@@ -142,7 +143,7 @@ grep -E '(sk-|pplx-|gho_|gsk_|ctx7sk_|key-)' ~/.pi/*.json ~/.pi/agent/*.json \
   && echo "❌ 检出硬编码 key" || echo "✅ 没硬编码 key"
 
 # 确认 git 包是 trusted source
-pi list | grep '^git:'    # 只应出现 3 个：superpowers / codegraph-pi / pi-lsp-client
+pi list | grep '^git:'    # 只应出现 2 个：codegraph-pi / pi-lsp-client（superpowers 走 npm）
 ```
 
 ## 参考
