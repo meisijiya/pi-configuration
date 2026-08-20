@@ -124,6 +124,7 @@ pi-configuration/
 ├── install-packages.sh       只跑 pi install
 └── docs/
     ├── decisions.md          关键决策记录
+    ├── configuration-switching.md  配置切换指南（preset 之间切换）
     └── troubleshooting.md    常见问题
 ```
 
@@ -177,6 +178,7 @@ pi list | grep '^git:'    # 只应出现 2 个：codegraph-pi / pi-lsp-client（
 
 - pi 官方文档：https://pi.dev
 - 调研记录（中文）：见 `docs/decisions.md`
+- 配置切换指南：见 `docs/configuration-switching.md`
 - 排查手册：见 `docs/troubleshooting.md`
 
 ## License

@@ -50,7 +50,7 @@
 
 - **Lane B · 部分 extension + matt skill 微调**（改动 9 项）：
   - 撤 `superpowers-zh` / `pi-simplify` / 2 个 agent（`tdd-guide` + `code-reviewer`）
-  - 加 `git:github.com/meisijiya/omo-skills` 装载源 + 新写 `extensions/git-guard.ts` + `extensions/migrate-skill-lock.ts`
+  - 加 `git:github.com/meisijiya/omo-skills` 装载源 + 新写 `extensions/git-guard.ts` + `scripts/migrate-skill-lock.ts`
   - 装 omo-skills 25 个 skill（带 14 个 description 守卫降低撞车）
   - 适合：接受 skill 触发模式 / 想用 description 守卫降低撞车风险
   - 触发习惯：`/simplify` 改为 `/skill:code-review` / 25 个 omo skill 部分 user-invoked
@@ -139,6 +139,7 @@
 | "write-guard 误拦截怎么修？" | [docs/omo-skills-integration.md §3B.7.1](docs/omo-skills-integration.md#3b71-write-guardts-description-修复两-lane-都修--lane-123-整合) |
 | "决策 9 superpowers 选择细节？" | [docs/decisions.md §决策 9](docs/decisions.md#决策-9superpowers-由用户选择中文版还是英文版) |
 | "INSTALL.md 步骤细节？" | [INSTALL.md](INSTALL.md) |
+| "怎么在 preset 之间切换？" / "已装好了想换 Lane" | [docs/configuration-switching.md](docs/configuration-switching.md) |
 | "9 个 subagent 是什么？" | [agents/](agents/) 目录 + 决策 9 / 10 |
 
 ---

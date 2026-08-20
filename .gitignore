@@ -31,3 +31,6 @@ backup-*/
 .env.local
 # WSL metadata
 *:Zone.Identifier
+
+# omo runtime (local state, never commit)
+.omo/

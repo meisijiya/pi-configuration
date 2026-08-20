@@ -61,7 +61,8 @@ echo "✅ 备份到 $BACKUP_DIR"
 
 ## 3. cp 用户选的 settings 模板
 
-**关键步骤**——按 [AGENTS.md §3 决策树](AGENTS.md#3-安装步骤始终执行) 结果选模板：
+**关键步骤**——按 [AGENTS.md §3 决策树](AGENTS.md#3-安装步骤始终执行) 结果选模板。
+（注：`deploy.sh` 现在也接受 `USER_CHOICE` 并部署同一个 preset，§5 会再覆盖一次——幂等；本步主要价值是**确认 + 预览**。）
 
 ```bash
 REPO_ROOT="$(pwd)"   # 当前仓库根目录
@@ -104,49 +105,13 @@ echo "✅ settings.json 已部署"
 
 ---
 
-## 4. 部署 agents/ + extensions/
+## 4. 部署 agents/ + extensions/（由 deploy.sh 完成）
 
-```bash
-REPO_ROOT="$(pwd)"
-PI_AGENT="$HOME/.pi/agent"
+`deploy.sh` 已按 `USER_CHOICE` 做 lane 感知部署，**无需再手动循环**：
 
-# agents/（无论 Lane A / B，deploy.sh 自动只拷贝仓库里存在的）
-mkdir -p "$PI_AGENT/agents"
-for f in "$REPO_ROOT"/agents/*.md; do
-    [ -f "$f" ] || continue
-    # 跳过 Zone.Identifier（WSL 元数据）
-    [[ "$f" == *":Zone.Identifier" ]] && continue
-    install -m 644 "$f" "$PI_AGENT/agents/$(basename "$f")"
-done
-echo "✅ agents/ 已部署"
-
-# extensions/
-mkdir -p "$PI_AGENT/extensions"
-for f in "$REPO_ROOT"/extensions/*.ts; do
-    [ -f "$f" ] || continue
-    [[ "$f" == *":Zone.Identifier" ]] && continue
-    install -m 644 "$f" "$PI_AGENT/extensions/$(basename "$f")"
-done
-echo "✅ extensions/ 已部署"
-```
-
-**Lane B 额外步骤（条件执行）**：
-
-仅当 `USER_CHOICE == "lane-b"` 时跑：
-
-```bash
-if [ "${USER_CHOICE}" == "lane-b" ]; then
-    # Lane B 撤 2 个 agent（tdd-guide / code-reviewer）
-    # 部署脚本已自动只拷贝仓库现有 agents——仓库里已经撤了这两个 agent，所以无需额外 rm
-    # 但 deploy.sh 不会清掉用户机器上已有的旧 agent——需要手动清：
-    for old in tdd-guide.md code-reviewer.md; do
-        if [ -f "$PI_AGENT/agents/$old" ]; then
-            echo "🗑️  删除 Lane B 不需要的旧 agent: $old"
-            rm -f "$PI_AGENT/agents/$old"
-        fi
-    done
-fi
-```
+- **agents/**：9 个 subagent；Lane B 自动跳过并删除 `tdd-guide.md` / `code-reviewer.md`。
+- **extensions/**：`write-guard.ts` 两 lane 都装；`git-guard.ts` 仅 Lane B 装。
+- `scripts/migrate-skill-lock.ts` 是 standalone 脚本，**不会**被拷贝到 `~/.pi/agent/extensions/`（避免被当作 extension 自动加载）。
 
 ---
 
@@ -155,14 +120,14 @@ fi
 ```bash
 REPO_ROOT="$(pwd)"
 cd "$REPO_ROOT"
-bash deploy.sh
+bash deploy.sh "$USER_CHOICE"    # lane-a.zh / lane-a.en / lane-a.bare / lane-b
 ```
 
 **deploy.sh 已做**：
 - 检查前置（已跑过 §1，可跳）
 - 备份（已跑过 §2，会再备份一次——幂等）
-- 部署 6 个配置文件（已跑过 §3 + §4，会再次覆盖——幂等）
-- 跑 `pi install` 装齐 PKGS（**这是这次新装的核心**）
+- 按 `USER_CHOICE` 部署 preset 的 settings.json + agents + extensions（替代旧 §3 + §4 的手动步骤，幂等）
+- 从该 preset 的 `packages` 数组跑 `pi install`（不再硬编码包列表）
 - 验证（`pi list` 检查）
 
 **Lane B 额外步骤**（**只在 §5 完成后跑**）：
@@ -192,9 +157,9 @@ if [ "${USER_CHOICE}" == "lane-b" ]; then
     # （让 Agent 帮用户跑，或用户自己启动 pi 跑）
     echo "📋 启动 pi 跑 /skill:setup-matt-pocock-skills 强制 init"
 
-    # 5c. 跑 extensions/migrate-skill-lock.ts（手动或 cron）
+    # 5c. 跑 scripts/migrate-skill-lock.ts（手动或 cron）
     # （本仓 deploy.sh 不自动跑——避免破坏用户 lock 文件）
-    echo "📋 手动跑：node extensions/migrate-skill-lock.ts（同步 lock 文件）"
+    echo "📋 手动跑：node scripts/migrate-skill-lock.ts（同步 lock 文件）"
 
     # 5d. 跑 git-guard.ts smoke test（参考 docs/omo-skills-integration.md §5.2）
     echo "📋 跑 smoke test 验证 Lane B 全部配置生效"

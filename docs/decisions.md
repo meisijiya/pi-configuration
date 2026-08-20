@@ -296,7 +296,7 @@ bash /path/to/pi-configuration/deploy.sh
 | [AGENTS.md](../AGENTS.md) / [INSTALL.md](../INSTALL.md) | 新增（决策树 + 6 步安装） |
 | `extensions/write-guard.ts` | description 修复（caller 维度） |
 | `extensions/git-guard.ts` | 新增（Lane B 必装） |
-| `extensions/migrate-skill-lock.ts` | 新增（Lane B 必装） |
+| `scripts/migrate-skill-lock.ts` | 新增（Lane B 必装） |
 | `agents/` | Lane B 撤 tdd-guide.md / code-reviewer.md（仓库里删，deploy.sh 自动不拷贝） |
 | 决策 9（中文 / 英文 / 不装选择） | 与本决策正交——Lane A 内部还要选 superpowers |
 

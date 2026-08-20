@@ -24,7 +24,7 @@
    - ✅ `pi-simplify` 撤（`/simplify` 由 omo `code-review` 接管，调用方式 `/simplify` → `/skill:code-review`）。
    - ✅ `pi-plan-mode` 保留（结构层职责 omo-skills 替代不了；**Lane 1 修正**：实际冲突仅 A 类，无 C 类流程覆盖）。
 4. **§4 关键风险**（来自 Lane 3 复审）：
-   - **§4.4 .skill-lock.json 实际 63 条记录**（非 49），且其中 47 条 `meisijiya/skills` + 1 条 `mattpocock/skills` + 15 misc。omo `cp -r` 覆盖 `handoff` 后 lock 不更新——**孤儿记录**。新增 `extensions/migrate-skill-lock.ts`。
+   - **§4.4 .skill-lock.json 实际 63 条记录**（非 49），且其中 47 条 `meisijiya/skills` + 1 条 `mattpocock/skills` + 15 misc。omo `cp -r` 覆盖 `handoff` 后 lock 不更新——**孤儿记录**。新增 `scripts/migrate-skill-lock.ts`。
    - **§4.8 幽灵 lock 修正**：用户机器**实际只有 9 个 SKILL.md 文件**，54 条 lock 是幽灵。`brainstorming` 等"superpowers-zh 来源"撤除后消失是**理论风险非实际**——这些 skill 现在已不在磁盘上。
    - **§4.3 git-guard 漏拦截命令**：`bash -c "git reset --hard"` / `git --exec-path=/tmp reset --hard` / 反斜杠转义 / `git -c alias.dh=... dh` 都会绕过。README 必须明列**已知绕过**。
    - **§4.1 setup-matt-pocock-skills 缓解不足**：README 软提示不够——smoke test 必跑 `/skill:setup-matt-pocock-skills` 强制 init。
@@ -231,7 +231,7 @@ agent 在 pi 里有 3 个 omo-skills 不具备的**结构性优势**：
 - 其余 10 个 npm 包 + 3 个内置 + `write-guard.ts` → **两 lane 保留**
 - `extensions/git-guard.ts` → **Lane B 新增**（替代 omo-skills `git-guardrails-claude-code`，详见 §3B.7）
 - `extensions/write-guard.ts` description → **两 lane 修复**（caller 维度判定）
-- `extensions/migrate-skill-lock.ts` → **Lane B 新增**（详见 §4.4）
+- `scripts/migrate-skill-lock.ts` → **Lane B 新增**（详见 §4.4）
 
 **D. omo-skills 的 `git-guardrails-claude-code` 在 pi 里的状态**
 
@@ -779,7 +779,7 @@ pi list   # 14 个
 5. **关键修正**：
    - §2.2 表：**撤 4 agent → 撤 2 agent**（`spec-miner` / `explore` 保留——omo 对应 skill 与这两 agent 方向正交）
    - §3.5 README：算术 bug（10+1+3=14 说=13）→ **9+1+3=13**
-   - §4.4：`.skill-lock.json` 49 条 → 实际 **63 条**；新增 `extensions/migrate-skill-lock.ts`
+   - §4.4：`.skill-lock.json` 49 条 → 实际 **63 条**；新增 `scripts/migrate-skill-lock.ts`
    - §4.8：理论风险 → 实际 **9 个 SKILL.md**（54 lock 是幽灵）
    - §4.7 + §3B.7.1：write-guard 修复散落两处 → 合并给 caller 判定伪代码 + description 修改文案（两 lane 都修）
    - §3B.7.2：git-guard.ts 给出 **38 行最小骨架**（Lane 2）
