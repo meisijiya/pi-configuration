@@ -258,9 +258,9 @@ bash /path/to/pi-configuration/deploy.sh
 
 ---
 
-## 决策 10：omo-skills 集成（Lane B 双路线版）
+## 决策 10：mattpocock/skills 官方版集成（Lane B 双路线版）
 
-**选择**：仓库提供 **两条并行路线**——Lane A 纯 extension / Lane B 部分 extension + matt skill 微调——通过 4 个 settings 模板 + [docs/omo-skills-integration.md](omo-skills-integration.md) 完整设计文档双呈现。
+**选择**：仓库提供 **两条并行路线**——Lane A 纯 extension / Lane B 部分 extension + matt skill 官方版——通过 4 个 settings 模板 + [docs/mattpocock-skills-integration.md](mattpocock-skills-integration.md) 完整设计文档双呈现。
 
 **两条路线差异**：
 
@@ -268,9 +268,9 @@ bash /path/to/pi-configuration/deploy.sh
 |---|---|---|
 | 改动量 | 0 | 9 项 |
 | PKGS 项数 | 14（3 模板）/ 13（bare） | 13 |
-| 撤 agent | 0 | 2（tdd-guide / code-reviewer——**注意**：原调研稿写撤 4 个，复审修正为撤 2 个，详见 [docs/omo-skills-integration.md §2.2](omo-skills-integration.md#22-按冲突类型逐项判定修正版--lane-1-复审)） |
+| 撤 agent | 0 | 2（tdd-guide / code-reviewer——**注意**：原调研稿写撤 4 个，复审修正为撤 2 个，详见 [docs/mattpocock-skills-integration.md §2.2](mattpocock-skills-integration.md#22-按冲突类型逐项判定修正版--lane-1-复审)） |
 | 撤 npm 扩展 | 0 | 2（superpowers-zh / pi-simplify） |
-| 加 git 源 | 0 | 1（meisijiya/omo-skills） |
+| 加 git 源 | 0 | 1（mattpocock/skills 官方版，经 packages filter 装载 25 stable） |
 | 加自写 extension | 0 | 2（git-guard.ts / migrate-skill-lock.ts） |
 | 修 write-guard.ts | 是（description + caller 判定） | 是 |
 | 适用 | 偏好 agent 独立上下文 / 不想引入 skill 体系 | 接受 skill 触发模式 + 用 description 守卫降低撞车 |
@@ -294,7 +294,7 @@ bash /path/to/pi-configuration/deploy.sh
 | 文件 | 变化 |
 |---|---|
 | `presets/settings.lane-b.json` | 新增 |
-| [docs/omo-skills-integration.md](omo-skills-integration.md) | 新增（完整设计，769 行 / 41.9K） |
+| [docs/mattpocock-skills-integration.md](mattpocock-skills-integration.md) | 重写（从 omo fork 改为 matt 官方版；保留骨架，fact 层差异替换） |
 | [AGENTS.md](../AGENTS.md) / [INSTALL.md](../INSTALL.md) | 新增（决策树 + 6 步安装） |
 | `extensions/write-guard.ts` | description 修复（caller 维度） |
 | `extensions/git-guard.ts` | 新增（Lane B 必装） |
@@ -309,4 +309,19 @@ bash /path/to/pi-configuration/deploy.sh
 3. **复现性优先**——INSTALL.md 6 步明确，cp + deploy.sh 让任何机器能复现
 4. **配置即代码**——`presets/` 4 个模板 + `extensions/` 自写 + `agents/` 9 个声明式 subagent
 
-**详细设计**：[docs/omo-skills-integration.md](omo-skills-integration.md)（含 3 lane 复审反馈、§2.2 修正冲突评级、§3B.7 三段自写 extension 详细设计、§4 风险与缓解按 lane 标注）
+**详细设计**：[docs/mattpocock-skills-integration.md](mattpocock-skills-integration.md)（含 3 lane 复审反馈、§2.2 修正冲突评级、§3B.7 三段自写 extension 详细设计、§4 风险与缓解按 lane 标注）
+
+### v1 → v2 增量变更日志（omo-skills fork → mattpocock/skills 官方版）
+
+| 维度 | v1（omo fork，2026 早期） | v2（matt 官方版，2026-08-20） |
+|---|---|---|
+| 装载源 | `git:github.com/meisijiya/omo-skills`（meisijiya fork） | **`git:github.com/mattpocock/skills`**（matt 官方版） |
+| 装载机制 | `pi install` 源 + INSTALL.md §5a `cp -r skills/<bucket>/<name>` 手动循环 | `pi install` 源 + `packages` 数组对象项的 `skills` filter（`["skills/engineering/*", "skills/productivity/*"]`）；pi convention 递归发现 SKILL.md，**无需 cp -r** |
+| Skill 数量 | 25（omo fork 选的 25 stable） | 25（matt 官方 stable：engineering 18 + productivity 7） |
+| description 守卫 | omo 有 14 个守卫降低撞车风险 | matt 官方**无**守卫；撞车风险↑，由 D1 决策接受 |
+| `extensions/git-guard.ts` 职责 | 替代 omo 的 git-guardrails-claude-code skill | 替代 matt 的 `misc/git-guardrails-claude-code` skill（pi 不识别 Claude Code hooks） |
+| `scripts/migrate-skill-lock.ts` OVERRIDDEN | 1 项（`handoff`） | **25 项**（engineering 18 + productivity 7，全映射 `mattpocock/skills`） |
+| `extensions/write-guard.ts` | description + caller 判定修复 | 仅改 1 行注释引用 docs 路径（实质代码不动） |
+| `agents/tdd-guide.md` / `agents/code-reviewer.md` | 撤（Lane B） | 撤（理由不变：matt `tdd` / `code-review` skill 接管） |
+| `agents/spec-miner.md` / `agents/explore.md` | 保留（Lane B） | 保留（理由不变：matt 不覆盖 brownfield 反向 / 探索正交） |
+| `presets/settings.lane-b.json` packages 数组 | 13 项，最后一项为字符串 | 13 项，最后一项为**对象形式**（含 `source` + `skills` filter） |
