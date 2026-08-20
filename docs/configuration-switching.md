@@ -210,9 +210,9 @@ INSTALL.md §5a 里 `~/.pi-test/agent/skills/` 是占位符，实际目标应是
 
 ### 7.4 个人模型偏好
 
-preset 里写死 `defaultProvider: minimax-cn / defaultModel: MiniMax-M3`。若你用的是别的模型
-（如 `opencode-go/deepseek-v4-pro`），切换后记得改回自己的 `~/.pi/agent/settings.json` 的
-`defaultProvider` / `defaultModel` 字段（见 [decisions.md](decisions.md) 决策 5）。
+preset 已不写模型——只声明 `packages`，`deploy.sh` 只更新 `packages` 字段，不覆盖你的
+`defaultProvider` / `defaultModel` / `theme` 等。所以切换后你的模型配置**会保留**，无需改回。
+（见 [decisions.md](decisions.md) 决策 5）
 
 ---
 

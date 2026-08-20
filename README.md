@@ -56,14 +56,14 @@
 ```bash
 git clone https://github.com/meisijiya/pi-configuration.git
 cd pi-configuration
-./deploy.sh
+./deploy.sh                 # 默认 lane-a.zh；可选 ./deploy.sh lane-b
 ```
 
 脚本会：
 1. 检查前置（node / npm / pi / codegraph / ffmpeg / yt-dlp / rtk）
 2. 备份现有 `~/.pi/agent/*` 和 `~/.pi/web-search.json` 到 `~/.pi/agent/backup-<时间戳>/`
-3. 部署 6 个配置文件到标准位置
-4. 跑 `pi install` 装齐 14 个包
+3. 按所选 preset 部署配置（settings.json 只更新 packages，不碰你的模型/主题等个人偏好）
+4. 跑 `pi install` 装齐该 preset 的包（Lane A 14 个 / Lane B 13 个）
 5. 验证
 
 ### 手动部署（精细控制）
@@ -83,7 +83,7 @@ cp tasks-global.json  ~/.pi/agent/tasks-config.json
 cp web-search.json    ~/.pi/web-search.json
 chmod 600 ~/.pi/agent/mcp.json ~/.pi/web-search.json
 
-# 4. 装 14 个 pi 包
+# 4. 装 preset 对应的 pi 包（读已部署 settings.json 的 packages）
 ./install-packages.sh
 
 # 5. 项目级（可选）
@@ -94,7 +94,7 @@ cp tasks-project.json /your/project/.pi/tasks-config.json
 ## 验证
 
 ```bash
-pi list    # 期望 14 个已装包
+pi list    # 期望 14 个已装包（Lane A）/ 13 个（Lane B / bare）
 
 # 测工具链
 pi

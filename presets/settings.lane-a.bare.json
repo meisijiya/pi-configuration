@@ -1,25 +1,9 @@
 {
-  "_comment": "Lane A · 纯 extension 路线 + 不装 superpowers。PKGS 13 项（3 内置 + 10 外部：8 npm + 2 git）。适用：用户想自己后续装 superpowers / 不想用 using-superpowers bootstrap 强约束。详见 docs/decisions.md §决策 9。",
-
-  "lastChangelogVersion": "0.84.2",
-  "theme": "dark",
-  "defaultProvider": "minimax-cn",
-  "defaultModel": "MiniMax-M3",
-  "defaultThinkingLevel": "medium",
-  "tuiMode": "fullscreen",
-  "hideThinkingBlock": false,
-
-  "extensions": [
-    "pi-system-prompt",
-    "pi-context-view",
-    "pi-context-breakup"
-  ],
-
+  "_comment": "Lane A · 纯 extension 路线 + 不装 superpowers（13 包）。用户自行后续装 superpowers。",
   "packages": [
     "npm:pi-context-view",
     "npm:pi-system-prompt",
     "npm:pi-context-breakup",
-
     "git:github.com/nosuiyi/codegraph-pi",
     "git:github.com/code-yeongyu/pi-lsp-client",
     "npm:@upstash/context7-pi@latest",
@@ -30,7 +14,5 @@
     "npm:@mrclrchtr/supi-claude-md@latest",
     "npm:pi-simplify@latest",
     "npm:pi-plan-mode@latest"
-  ],
-
-  "trust": true
+  ]
 }

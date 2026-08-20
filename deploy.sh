@@ -82,11 +82,19 @@ fi
 step "3/6 部署配置（preset: $USER_CHOICE）"
 
 mkdir -p "$PI_AGENT"
-install -m 644 "$PRESET"                          "$PI_AGENT/settings.json"
+# settings.json：只更新 packages 字段，保留用户现有的 defaultProvider/defaultModel/theme 等个人偏好
+node -e '
+const fs = require("fs");
+const preset = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+const target = process.argv[2];
+const s = fs.existsSync(target) ? JSON.parse(fs.readFileSync(target, "utf8")) : {};
+s.packages = preset.packages;
+fs.writeFileSync(target, JSON.stringify(s, null, 2) + "\n");
+' "$PRESET" "$PI_AGENT/settings.json"
 install -m 600 "$REPO_ROOT/mcp.json"              "$PI_AGENT/mcp.json"
 install -m 644 "$REPO_ROOT/tasks-global.json"     "$PI_AGENT/tasks-config.json"
 install -m 600 "$REPO_ROOT/web-search.json"       "$PI_HOME/web-search.json"
-ok "  ~/.pi/agent/settings.json（来自 $USER_CHOICE）"
+ok "  ~/.pi/agent/settings.json（packages 来自 $USER_CHOICE，个人偏好保留）"
 ok "  ~/.pi/agent/mcp.json (600)"
 ok "  ~/.pi/agent/tasks-config.json"
 ok "  ~/.pi/web-search.json (600)"

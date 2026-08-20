@@ -59,37 +59,25 @@ echo "✅ 备份到 $BACKUP_DIR"
 
 ---
 
-## 3. cp 用户选的 settings 模板
+## 3. 确认用户选的 settings 模板
 
-**关键步骤**——按 [AGENTS.md §3 决策树](AGENTS.md#3-安装步骤始终执行) 结果选模板。
-（注：`deploy.sh` 现在也接受 `USER_CHOICE` 并部署同一个 preset，§5 会再覆盖一次——幂等；本步主要价值是**确认 + 预览**。）
+**关键步骤**——按 [AGENTS.md §3 决策树](AGENTS.md#3-安装步骤始终执行) 结果确认 `USER_CHOICE`。
+实际写入由 §5 的 `deploy.sh "$USER_CHOICE"` 完成（只更新 packages 字段、保留个人偏好），本步只做**确认 + 预览**。
 
 ```bash
 REPO_ROOT="$(pwd)"   # 当前仓库根目录
-PI_AGENT="$HOME/.pi/agent"
-TEMPLATE=""
+USER_CHOICE="${USER_CHOICE:-lane-a.zh}"
+TEMPLATE="$REPO_ROOT/presets/settings.$USER_CHOICE.json"
 
-case "${USER_CHOICE:-lane-a.zh}" in
-    lane-a.zh)   TEMPLATE="$REPO_ROOT/presets/settings.lane-a.zh.json" ;;
-    lane-a.en)   TEMPLATE="$REPO_ROOT/presets/settings.lane-a.en.json" ;;
-    lane-a.bare) TEMPLATE="$REPO_ROOT/presets/settings.lane-a.bare.json" ;;
-    lane-b)      TEMPLATE="$REPO_ROOT/presets/settings.lane-b.json" ;;
+case "$USER_CHOICE" in
+    lane-a.zh|lane-a.en|lane-a.bare|lane-b) ;;
     *) echo "❌ USER_CHOICE 必须是 lane-a.zh / lane-a.en / lane-a.bare / lane-b 之一"; exit 1 ;;
 esac
-
 [ -f "$TEMPLATE" ] || { echo "❌ 模板不存在: $TEMPLATE"; exit 1; }
 
-# 告知用户
-echo "📋 将 cp 以下模板到 $PI_AGENT/settings.json："
-echo "   $TEMPLATE"
-echo "   现有 settings.json 已备份到 $BACKUP_DIR/"
-echo
-echo "继续？[y/N]"
-read -r confirm
-[[ "$confirm" =~ ^[Yy]$ ]] || { echo "❌ 用户取消"; exit 1; }
-
-install -m 644 "$TEMPLATE" "$PI_AGENT/settings.json"
-echo "✅ settings.json 已部署"
+# 预览该 preset 的 packages（不实际写入——deploy.sh 会做 merge）
+echo "📋 将使用 preset: $TEMPLATE"
+node -e 'const d=require(process.argv[1]); console.log("packages（" + d.packages.length + " 个）"); for (const p of d.packages) console.log("   - " + p);' "$TEMPLATE"
 ```
 
 **USER_CHOICE 取值**：
@@ -101,7 +89,7 @@ echo "✅ settings.json 已部署"
 | 决策 1 = A + 决策 2 = 不装 | `lane-a.bare` |
 | 决策 1 = B | `lane-b` |
 
-**汇报**：告诉用户 cp 了哪个模板 / 备份目录 / 当前 settings.json 内容 PKGS 项数。
+**汇报**：告诉用户选了哪个 preset / 该 preset 有多少个包（部署由 §5 完成）。
 
 ---
 

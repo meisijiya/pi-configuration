@@ -119,20 +119,22 @@ bash -c "source ... && npm" install <pkg> --prefix ... --legacy-peer-deps
 
 ---
 
-## 决策 5：默认模型选择（个人偏好，可改）
+## 决策 5：默认模型选择（个人偏好，不进 preset）
 
-`settings.json` 里写了：
+模型是个人偏好，**不写进 preset**。preset 只声明 `packages`；`deploy.sh` 部署时只更新 `packages` 字段，不碰 `defaultProvider` / `defaultModel` / `theme` 等。
+
+用户自己在 `~/.pi/agent/settings.json` 里配：
 ```jsonc
 "defaultProvider": "minimax-cn",
 "defaultModel": "MiniMax-M3"
 ```
 
-这是个人的 pi 默认 LLM。**部署到其他人需要改成自己的**：
+常见选择：
 - Claude：`anthropic/claude-sonnet-4-5`
 - GPT：`openai/gpt-5`
 - 本地 ollama：`ollama/qwen2.5-coder:32b`
 
-deploy.sh **不会**改这个字段——保留个人偏好。手动编辑覆盖。
+（历史：早期 preset 里曾写死 `minimax-cn/MiniMax-M3`，会覆盖用户模型，已改为“只声明 packages”。）
 
 ---
 

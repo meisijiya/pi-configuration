@@ -1,27 +1,12 @@
 {
-  "lastChangelogVersion": "0.84.2",
-  "theme": "dark",
-  "defaultProvider": "minimax-cn",
-  "defaultModel": "MiniMax-M3",
-  "defaultThinkingLevel": "medium",
-  "tuiMode": "fullscreen",
-  "hideThinkingBlock": false,
-
-  "extensions": [
-    "pi-system-prompt",
-    "pi-context-view",
-    "pi-context-breakup"
-  ],
-
+  "_comment": "默认 = Lane A.zh（与 presets/settings.lane-a.zh.json 的 packages 一致）。只声明 packages；deploy.sh 默认用 presets/ 里的模板，本文件仅供手动部署参考。",
   "packages": [
     "npm:pi-context-view",
     "npm:pi-system-prompt",
     "npm:pi-context-breakup",
-
-    "git:github.com/obra/superpowers",
+    "npm:superpowers-zh@latest",
     "git:github.com/nosuiyi/codegraph-pi",
     "git:github.com/code-yeongyu/pi-lsp-client",
-
     "npm:@upstash/context7-pi@latest",
     "npm:@tintinweb/pi-tasks@latest",
     "npm:@tintinweb/pi-subagents@latest",
@@ -30,7 +15,5 @@
     "npm:@mrclrchtr/supi-claude-md@latest",
     "npm:pi-simplify@latest",
     "npm:pi-plan-mode@latest"
-  ],
-
-  "trust": true
+  ]
 }
