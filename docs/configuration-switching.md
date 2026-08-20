@@ -10,7 +10,7 @@
 | `settings.lane-a.zh.json` | A | `npm:superpowers-zh@latest`（中文增强版） | 14 | 9 个 subagent + write-guard.ts |
 | `settings.lane-a.en.json` | A | `git:github.com/obra/superpowers`（英文原版） | 14 | 同上 |
 | `settings.lane-a.bare.json` | A | 无 | 13 | 同上 |
-| `settings.lane-b.json` | B | 撤除，改用 `git:github.com/meisijiya/omo-skills`（25 skill） | 13 | 撤 `tdd-guide` / `code-reviewer`；加 `git-guard.ts` + `migrate-skill-lock.ts` |
+| `settings.lane-b.json` | B | 撤除，改用 `git:github.com/mattpocock/skills` 官方版（25 stable skill） | 13 | 撤 `tdd-guide` / `code-reviewer`；加 `git-guard.ts` + `migrate-skill-lock.ts`（OVERRIDDEN 25 项） |
 
 **切换的本质** = 「cp 目标 preset 覆盖 settings.json」+「`pi remove` / `pi install` 对齐 package 差异」+「按 Lane 增删 agent/extension」。三者缺一不可。
 
@@ -41,8 +41,8 @@ echo "✅ 备份到 $BACKUP"
 | A.en → A.zh | `git:github.com/obra/superpowers` | `npm:superpowers-zh@latest` | 无 |
 | A.zh/A.en → A.bare | `npm:superpowers-zh`（或 `git:github.com/obra/superpowers`） | — | 无 |
 | A.bare → A.zh/A.en | — | `npm:superpowers-zh@latest`（或 obra） | 无 |
-| A → B | `npm:superpowers-zh`（或 obra）+ `npm:pi-simplify` | `git:github.com/meisijiya/omo-skills` | 撤 2 agent + 加 2 extension + 装载 omo-skills（见 §4） |
-| B → A | `git:github.com/meisijiya/omo-skills` | `npm:superpowers-zh@latest`（或 obra）+ `npm:pi-simplify` | 加回 2 agent（见 §5） |
+| A → B | `npm:superpowers-zh`（或 obra）+ `npm:pi-simplify` | `git:github.com/mattpocock/skills` | 撤 2 agent + 加 2 extension + 装载 matt skill（见 §4） |
+| B → A | `git:github.com/mattpocock/skills` | `npm:superpowers-zh@latest`（或 obra）+ `npm:pi-simplify` | 加回 2 agent（见 §5） |
 
 ---
 
@@ -93,7 +93,7 @@ pi
 
 ---
 
-## 4. Lane A → Lane B（装 omo-skills 25 skill）
+## 4. Lane A → Lane B（装 mattpocock/skills 25 stable skill）
 
 > ⚠️ 这是改动最大的一次切换。**务必先做 §1 备份。**
 
@@ -107,8 +107,8 @@ cp "$REPO_ROOT/presets/settings.lane-b.json" ~/.pi/agent/settings.json
 pi remove npm:superpowers-zh                  # 或 git:github.com/obra/superpowers
 pi remove npm:pi-simplify
 
-# 4.3 装 omo-skills 装载源
-pi install git:github.com/meisijiya/omo-skills
+# 4.3 装 mattpocock/skills 装载源（经 packages filter 装 25 stable）
+pi install git:github.com/mattpocock/skills
 
 # 4.4 撤 2 个被 omo 覆盖的 agent
 rm -f ~/.pi/agent/agents/tdd-guide.md ~/.pi/agent/agents/code-reviewer.md
@@ -119,11 +119,10 @@ cp "$REPO_ROOT/extensions/git-guard.ts" ~/.pi/agent/extensions/
 # 注意：migrate-skill-lock.ts 是 standalone 脚本（scripts/ 下），不要 cp 进 extensions/，
 #       否则会被 pi 当作 extension 自动加载。
 
-# 4.6 装载 omo-skills 25 个 skill（详见 INSTALL.md §5a）
-#     需要先 clone omo-skills 仓库，然后 cp -r skills/engineering/* 和 skills/productivity/*
+# 4.6 装载 25 stable skill（pi convention 自动发现；详见 INSTALL.md §5a）
 #     到 ~/.pi/agent/skills/
 
-# 4.7 同步 .skill-lock.json（被 omo 覆盖的 skill 改指向 omo-skills + 更新 tree SHA）
+# 4.7 同步 .skill-lock.json（把 25 stable skill 对齐到 mattpocock/skills 源 + 更新 tree SHA）
 node "$REPO_ROOT/scripts/migrate-skill-lock.ts"
 
 # 4.8 启动 pi 跑强制 init（让 agent 帮跑，或手动）
@@ -149,8 +148,8 @@ REPO_ROOT=/path/to/pi-configuration
 # 5.1 覆盖 settings 模板（选 zh / en / bare 之一）
 cp "$REPO_ROOT/presets/settings.lane-a.zh.json" ~/.pi/agent/settings.json
 
-# 5.2 撤 omo-skills
-pi remove git:github.com/meisijiya/omo-skills
+# 5.2 撤 mattpocock/skills
+pi remove git:github.com/mattpocock/skills
 
 # 5.3 装回 superpowers + pi-simplify（bare 则不装 superpowers）
 pi install npm:superpowers-zh@latest    # 或 git:github.com/obra/superpowers
@@ -195,17 +194,17 @@ cp "$BACKUP/settings.json" ~/.pi/agent/settings.json
 - 按 lane 增删 agent / extension。
 
 所以**切换可以直接跑 `bash deploy.sh lane-b`** 等。但注意：deploy.sh 只负责 `pi install`，
-Lane B 的 omo-skills 25 skill 装载、`/skill:setup-matt-pocock-skills`、`migrate-skill-lock.ts` 仍需手动（§4.6–4.8）。
+Lane B 的 mattpocock/skills 25 stable skill 装载（pi convention 自动）、`/skill:setup-matt-pocock-skills`、`migrate-skill-lock.ts` 仍需手动（§4.6–4.8）。
 
 ### 7.2 `write-guard.ts` 已改为默认放行
 
 `write-guard.ts` 旧版会全局拦截主对话所有 write/edit（实测已复现）。现版本**默认放行**，
 严格白名单仅在 `WRITE_GUARD_STRICT=1` 时启用。所以切换后主对话能正常写文件是**预期行为**，不是 bug。
 
-### 7.3 omo-skills 装载路径 + migrate-skill-lock
+### 7.3 mattpocock/skills 装载路径 + migrate-skill-lock
 
 INSTALL.md §5a 里 `~/.pi-test/agent/skills/` 是占位符，实际目标应是 `~/.pi/agent/skills/`。
-`migrate-skill-lock.ts` 现在**通过 GitHub API 拉取 omo-skills 的 tree 取 tree SHA**（与 `npx skills update` 比对逻辑一致），
+`migrate-skill-lock.ts` 现在**通过 GitHub API 拉取 mattpocock/skills 的 tree 取 tree SHA**（与 `npx skills update` 比对逻辑一致），
 不读本地 skill 文件；离线时会报错并跳过该条目，不会写入错误 hash。
 
 ### 7.4 个人模型偏好
