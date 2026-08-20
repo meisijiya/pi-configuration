@@ -122,34 +122,17 @@ bash deploy.sh "$USER_CHOICE"    # lane-a.zh / lane-a.en / lane-a.bare / lane-b
 
 ```bash
 if [ "${USER_CHOICE}" == "lane-b" ]; then
-    # 5a. 装载 omo-skills 25 个 skill 到 ~/.pi/agent/skills/
-    # deploy.sh 已经 pi install 了 git:github.com/meisijiya/omo-skills
-    # 但 pi install 只是声明源，实际装载需要 cp -r（INSTALL.md §5a-Lane-B）
-    cd /path/to/omo-skills   # 用户需先 git clone
-    for s in \
-      ask-matt code-review codebase-design diagnosing-bugs \
-      domain-modeling grill-with-docs implement \
-      improve-codebase-architecture prototype research \
-      resolving-merge-conflicts setup-matt-pocock-skills tdd \
-      to-spec to-tickets triage wayfinder wizard; do
-      cp -r skills/engineering/$s ~/.pi-test/agent/skills/   # 实际用 ~/.pi/agent/skills/
-    done
-    for s in \
-      grill-me grilling handoff teach to-questionnaire \
-      wait-what writing-for-agents; do
-      cp -r skills/productivity/$s ~/.pi-test/agent/skills/   # 实际用 ~/.pi/agent/skills/
-    done
-    echo "✅ omo-skills 25 skill 已装载"
+    # 5a. 装载源已 deploy.sh pi install；pi convention 自动发现 skills/engineering/* + skills/productivity/* 25 stable
+    #     此步幂等（可重复）
+    pi update --extensions
 
-    # 5b. 跑 /skill:setup-matt-pocock-skills 强制 init
-    # （让 Agent 帮用户跑，或用户自己启动 pi 跑）
+    # 5b. 启动 pi 跑 /skill:setup-matt-pocock-skills 强制 init
     echo "📋 启动 pi 跑 /skill:setup-matt-pocock-skills 强制 init"
 
-    # 5c. 跑 scripts/migrate-skill-lock.ts（手动或 cron）
-    # （本仓 deploy.sh 不自动跑——避免破坏用户 lock 文件）
-    echo "📋 手动跑：node scripts/migrate-skill-lock.ts（同步 lock 文件）"
+    # 5c. 跑 scripts/migrate-skill-lock.ts 把 25 个 stable skill 的 lock 对齐到 mattpocock/skills
+    echo "📋 手动跑：node scripts/migrate-skill-lock.ts（从 omo 迁来的用户必跑；新装用户 lock 已对齐，可跳）"
 
-    # 5d. 跑 git-guard.ts smoke test（参考 docs/omo-skills-integration.md §5.2）
+    # 5d. 跑 smoke test（参考 docs/mattpocock-skills-integration.md §5.2）
     echo "📋 跑 smoke test 验证 Lane B 全部配置生效"
 fi
 ```
@@ -168,7 +151,7 @@ pi list 2>&1 | head -30
 #   Lane A.zh: 14 个 package（含 superpowers-zh）
 #   Lane A.en: 14 个 package（含 obra/superpowers）
 #   Lane A.bare: 13 个 package（无 superpowers）
-#   Lane B: 13 个 package（含 meisijiya/omo-skills）
+#   Lane B: 13 个 package（含 mattpocock/skills 官方版；展开装载 25 stable skill）
 
 # 配置文件存在 + 权限
 for f in settings.json mcp.json tasks-config.json web-search.json; do
@@ -199,7 +182,7 @@ pi
 > /simplify                       # ❌ Lane B 已撤 pi-simplify，期望未知命令
 > /skill:code-review              # ✅ Lane B 用 omo code-review
 > /skill:grill-me                 # ✅ omo grill-me
-> /skill:setup-matt-pocock-skills # ✅ 已 init（§5b 跑过）
+> /skill:setup-matt-pocock-skills # ✅ 已 init（§5b 跑过；matt 官方版 skill 触发，内容同 omo）
 > /skills                         # 应见 25 个 omo skill + 7 个 subagent
 ```
 
