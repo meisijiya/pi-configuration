@@ -29,3 +29,5 @@ backup-*/
 # Sensitive (API keys go in ~/.pi/web-search.json, not in repo)
 .env
 .env.local
+# WSL metadata
+*:Zone.Identifier

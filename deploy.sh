@@ -77,6 +77,24 @@ ok "  ~/.pi/agent/mcp.json (600)"
 ok "  ~/.pi/agent/tasks-config.json"
 ok "  ~/.pi/web-search.json (600)"
 
+# Agent 定义（9 个 subagent）
+mkdir -p "$PI_AGENT/agents"
+for f in "$REPO_ROOT"/agents/*.md; do
+  [ -f "$f" ] || continue
+  install -m 644 "$f" "$PI_AGENT/agents/$(basename "$f")"
+done
+ok "  ~/.pi/agent/agents/ (9 个 subagent)"
+
+# 自定义 extension（只 deploy 我们仓库里的；rtk/herdr 属于上游，不在仓库）
+if [ -d "$REPO_ROOT/extensions" ]; then
+  mkdir -p "$PI_AGENT/extensions"
+  for f in "$REPO_ROOT"/extensions/*.ts; do
+    [ -f "$f" ] || continue
+    install -m 644 "$f" "$PI_AGENT/extensions/$(basename "$f")"
+  done
+  ok "  ~/.pi/agent/extensions/ (仓库自有扩展)"
+fi
+
 # 项目级（只在当前目录有 .pi/ 时部署）
 if [ -d ".pi" ]; then
   install -m 644 "$REPO_ROOT/tasks-project.json" ".pi/tasks-config.json"
