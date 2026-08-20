@@ -1,5 +1,5 @@
 {
-  "_comment": "Lane B · 部分 extension + matt skill 微调（13 包）。撤 superpowers-zh + pi-simplify，加 omo-skills 装载源。配套撤 tdd-guide/code-reviewer agent，加 git-guard.ts。",
+  "_comment": "Lane B · 部分 extension + mattpocock/skills 官方版（13 包）。撤 superpowers-zh + pi-simplify，装 mattpocock/skills 源（pi convention 自动发现 skills/ 下 25 stable SKILL.md，无需 cp -r）。配套撤 tdd-guide/code-reviewer agent，加 git-guard.ts。",
   "packages": [
     "npm:pi-context-view",
     "npm:pi-system-prompt",
@@ -13,6 +13,9 @@
     "npm:pi-mcp-extension@latest",
     "npm:@mrclrchtr/supi-claude-md@latest",
     "npm:pi-plan-mode@latest",
-    "git:github.com/meisijiya/omo-skills"
+    {
+      "source": "git:github.com/mattpocock/skills",
+      "skills": ["skills/engineering/*", "skills/productivity/*"]
+    }
   ]
 }
