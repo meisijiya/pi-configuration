@@ -1,23 +1,17 @@
 #!/usr/bin/env bash
-# 只跑 pi install，不动任何配置。给"已经部署好、只想补装包"的场景用。
+# 只跑 pi install（从当前已部署的 ~/.pi/agent/settings.json 读 packages），不动任何配置。
+# 给"已经部署好、只想补装/重装包"的场景用。
 set -e
 
-PKGS=(
-  "npm:pi-context-view"
-  "npm:pi-system-prompt"
-  "npm:pi-context-breakup"
-  "npm:superpowers-zh@latest"   # 中文增强版：14 翻译 + 6 国内原创 skill。英文原版：git:github.com/obra/superpowers（详见 docs/decisions.md 决策 9）
-  "git:github.com/nosuiyi/codegraph-pi"
-  "git:github.com/code-yeongyu/pi-lsp-client"
-  "npm:@upstash/context7-pi@latest"
-  "npm:@tintinweb/pi-tasks@latest"
-  "npm:@tintinweb/pi-subagents@latest"
-  "npm:pi-web-access@latest"
-  "npm:pi-mcp-extension@latest"
-  "npm:@mrclrchtr/supi-claude-md@latest"
-  "npm:pi-simplify@latest"
-  "npm:pi-plan-mode@latest"
-)
+PI_AGENT="${HOME}/.pi/agent"
+SETTINGS="${PI_AGENT}/settings.json"
+
+if [ ! -f "$SETTINGS" ]; then
+  echo "❌ $SETTINGS 不存在——先跑 bash deploy.sh [lane-...] 部署"
+  exit 1
+fi
+
+mapfile -t PKGS < <(node -e 'process.stdout.write(require(process.argv[1]).packages.join("\n"))' "$SETTINGS")
 
 i=0
 for pkg in "${PKGS[@]}"; do
@@ -27,5 +21,5 @@ for pkg in "${PKGS[@]}"; do
 done
 
 echo ""
-echo "✅ 全部命令完成。验证：pi list"
-echo "💡 切回英文 superpowers：pi remove npm:superpowers-zh && pi install git:github.com/obra/superpowers"
+echo "✅ 全部命令完成（${#PKGS[@]} 个包）。验证：pi list"
+echo "💡 切换配置见 docs/configuration-switching.md"

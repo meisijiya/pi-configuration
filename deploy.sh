@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # ============================================================
 # pi-configuration deploy script
-# 把本仓库的 6 个配置文件部署到 pi 的标准位置，
-# 并跑 `pi install` 装齐 14 个扩展包。
-# 幂等：可重复运行，已装的会自动跳过。
+# 用法：
+#   bash deploy.sh [lane-a.zh|lane-a.en|lane-a.bare|lane-b]
+# 默认 lane-a.zh。按所选 preset 部署 settings.json + agents + extensions，
+# 并从该 preset 的 packages 装齐 pi 包。幂等：可重复运行。
 # ============================================================
 set -euo pipefail
 
@@ -23,6 +24,16 @@ step()  { echo -e "${BLUE}▶${NC} $*"; }
 ok()    { echo -e "${GREEN}✓${NC} $*"; }
 warn()  { echo -e "${YELLOW}⚠${NC}  $*"; }
 err()   { echo -e "${RED}✗${NC}  $*"; exit 1; }
+
+# ---------- 0. 解析 USER_CHOICE ----------
+USER_CHOICE="${1:-${USER_CHOICE:-lane-a.zh}}"
+case "$USER_CHOICE" in
+  lane-a.zh|lane-a.en|lane-a.bare|lane-b) ;;
+  *) err "USER_CHOICE 必须是 lane-a.zh / lane-a.en / lane-a.bare / lane-b 之一，实际: $USER_CHOICE" ;;
+esac
+PRESET="$REPO_ROOT/presets/settings.$USER_CHOICE.json"
+[ -f "$PRESET" ] || err "preset 不存在: $PRESET"
+step "preset = $USER_CHOICE（$PRESET）"
 
 # ---------- 1. 前置检查 ----------
 step "1/6 检查前置依赖"
@@ -64,36 +75,51 @@ if [ -f "$PI_HOME/web-search.json" ]; then
   ok "  备份 ~/.pi/web-search.json"
 fi
 
+[ -d "$PI_AGENT/agents" ]    && cp -r "$PI_AGENT/agents"    "$BACKUP_DIR/agents"    && ok "  备份 agents/"
+[ -d "$PI_AGENT/extensions" ] && cp -r "$PI_AGENT/extensions" "$BACKUP_DIR/extensions" && ok "  备份 extensions/"
+
 # ---------- 3. 部署配置 ----------
-step "3/6 部署配置到标准位置"
+step "3/6 部署配置（preset: $USER_CHOICE）"
 
 mkdir -p "$PI_AGENT"
-install -m 644 "$REPO_ROOT/settings.json"      "$PI_AGENT/settings.json"
-install -m 600 "$REPO_ROOT/mcp.json"           "$PI_AGENT/mcp.json"
-install -m 644 "$REPO_ROOT/tasks-global.json"  "$PI_AGENT/tasks-config.json"
-install -m 600 "$REPO_ROOT/web-search.json"    "$PI_HOME/web-search.json"
-ok "  ~/.pi/agent/settings.json"
+install -m 644 "$PRESET"                          "$PI_AGENT/settings.json"
+install -m 600 "$REPO_ROOT/mcp.json"              "$PI_AGENT/mcp.json"
+install -m 644 "$REPO_ROOT/tasks-global.json"     "$PI_AGENT/tasks-config.json"
+install -m 600 "$REPO_ROOT/web-search.json"       "$PI_HOME/web-search.json"
+ok "  ~/.pi/agent/settings.json（来自 $USER_CHOICE）"
 ok "  ~/.pi/agent/mcp.json (600)"
 ok "  ~/.pi/agent/tasks-config.json"
 ok "  ~/.pi/web-search.json (600)"
 
-# Agent 定义（9 个 subagent）
+# Agent 定义（9 个 subagent；Lane B 撤 tdd-guide / code-reviewer）
 mkdir -p "$PI_AGENT/agents"
 for f in "$REPO_ROOT"/agents/*.md; do
   [ -f "$f" ] || continue
-  install -m 644 "$f" "$PI_AGENT/agents/$(basename "$f")"
+  [[ "$f" == *":Zone.Identifier" ]] && continue
+  name="$(basename "$f")"
+  if [ "$USER_CHOICE" = "lane-b" ] && { [ "$name" = "tdd-guide.md" ] || [ "$name" = "code-reviewer.md" ]; }; then
+    continue
+  fi
+  install -m 644 "$f" "$PI_AGENT/agents/$name"
 done
-ok "  ~/.pi/agent/agents/ (9 个 subagent)"
-
-# 自定义 extension（只 deploy 我们仓库里的；rtk/herdr 属于上游，不在仓库）
-if [ -d "$REPO_ROOT/extensions" ]; then
-  mkdir -p "$PI_AGENT/extensions"
-  for f in "$REPO_ROOT"/extensions/*.ts; do
-    [ -f "$f" ] || continue
-    install -m 644 "$f" "$PI_AGENT/extensions/$(basename "$f")"
+if [ "$USER_CHOICE" = "lane-b" ]; then
+  # 清掉机器上可能残留的旧 agent（deploy.sh 不覆盖删除，需显式清）
+  for old in tdd-guide.md code-reviewer.md; do
+    if [ -f "$PI_AGENT/agents/$old" ]; then
+      warn "删除 Lane B 不需要的旧 agent: $old"
+      rm -f "$PI_AGENT/agents/$old"
+    fi
   done
-  ok "  ~/.pi/agent/extensions/ (仓库自有扩展)"
 fi
+ok "  ~/.pi/agent/agents/"
+
+# 自定义 extension（只部署真正的 extension；scripts/migrate-skill-lock.ts 是 standalone 脚本，不在此列）
+mkdir -p "$PI_AGENT/extensions"
+install -m 644 "$REPO_ROOT/extensions/write-guard.ts" "$PI_AGENT/extensions/write-guard.ts"
+if [ "$USER_CHOICE" = "lane-b" ]; then
+  install -m 644 "$REPO_ROOT/extensions/git-guard.ts" "$PI_AGENT/extensions/git-guard.ts"
+fi
+ok "  ~/.pi/agent/extensions/（write-guard 始终 + git-guard 仅 lane-b）"
 
 # 项目级（只在当前目录有 .pi/ 时部署）
 if [ -d ".pi" ]; then
@@ -105,24 +131,9 @@ else
 fi
 
 # ---------- 4. pi install ----------
-step "4/6 跑 pi install（14 个包）"
+step "4/6 跑 pi install（packages 来自 $USER_CHOICE）"
 
-PKGS=(
-  "npm:pi-context-view"
-  "npm:pi-system-prompt"
-  "npm:pi-context-breakup"
-  "npm:superpowers-zh@latest"   # 中文增强版：14 翻译 + 6 国内原创 skill。英文原版：git:github.com/obra/superpowers（详见 docs/decisions.md 决策 9）
-  "git:github.com/nosuiyi/codegraph-pi"
-  "git:github.com/code-yeongyu/pi-lsp-client"
-  "npm:@upstash/context7-pi@latest"
-  "npm:@tintinweb/pi-tasks@latest"
-  "npm:@tintinweb/pi-subagents@latest"
-  "npm:pi-web-access@latest"
-  "npm:pi-mcp-extension@latest"
-  "npm:@mrclrchtr/supi-claude-md@latest"
-  "npm:pi-simplify@latest"
-  "npm:pi-plan-mode@latest"
-)
+mapfile -t PKGS < <(node -e 'process.stdout.write(require(process.argv[1]).packages.join("\n"))' "$PRESET")
 
 i=0
 for pkg in "${PKGS[@]}"; do
@@ -130,6 +141,7 @@ for pkg in "${PKGS[@]}"; do
   echo -e "  ${BLUE}[$i/${#PKGS[@]}]${NC} $pkg"
   pi install "$pkg" 2>&1 | tail -3 || warn "    跳过（可能已装）"
 done
+ok "  共 ${#PKGS[@]} 个包"
 
 # ---------- 5. 验证 ----------
 step "5/6 验证"
@@ -146,9 +158,26 @@ done
 # ---------- 6. 下一步提示 ----------
 step "6/6 完成"
 
+if [ "$USER_CHOICE" = "lane-b" ]; then
 cat <<EOF
 
-${GREEN}✅ 部署完成${NC}
+${GREEN}✅ 部署完成（Lane B）${NC}
+   备份目录：$BACKUP_DIR
+
+Lane B 还有 4 个额外步骤（详见 INSTALL.md §5a-d）：
+   5a. 装载 omo-skills 25 个 skill 到 ~/.pi/agent/skills/
+   5b. 启动 pi 跑 /skill:setup-matt-pocock-skills 强制 init
+   5c. 跑 node scripts/migrate-skill-lock.ts（同步 lock）
+   5d. 跑 smoke test 验证 git-guard 生效
+
+   验证：pi
+     /simplify            # ❌ 期望未知命令（已撤 pi-simplify）
+     /skill:code-review   # ✅ omo code-review
+EOF
+else
+cat <<EOF
+
+${GREEN}✅ 部署完成（$USER_CHOICE）${NC}
    备份目录：$BACKUP_DIR
 
 下一步：
@@ -163,10 +192,11 @@ ${GREEN}✅ 部署完成${NC}
         /websearch react   # pi-web-access
 
    3. 触发各 skill：
-        "help me plan this feature"   # 触发 superpowers brainstorming
-        "how does auth.ts work"       # 触发 codegraph
-        "show type errors in src/foo.ts"   # 触发 lsp
+        "help me plan this feature"     # superpowers brainstorming
+        "how does auth.ts work"         # codegraph
+        "show type errors in src/foo.ts"   # lsp
 
    4. 完整验证清单见 docs/troubleshooting.md
 
 EOF
+fi
