@@ -172,15 +172,15 @@ cat <<EOF
 ${GREEN}✅ 部署完成（Lane B）${NC}
    备份目录：$BACKUP_DIR
 
-Lane B 还有 4 个额外步骤（详见 INSTALL.md §5a-d）：
-   5a. 装载 omo-skills 25 个 skill 到 ~/.pi/agent/skills/
+Lane B 还有 3 个额外步骤（详见 INSTALL.md §5a-d）：
+   5a. pi update --extensions（装载源已 deploy.sh 装；pi convention 自动发现 25 stable skill）
    5b. 启动 pi 跑 /skill:setup-matt-pocock-skills 强制 init
-   5c. 跑 node scripts/migrate-skill-lock.ts（同步 lock）
-   5d. 跑 smoke test 验证 git-guard 生效
+   5c. 跑 node scripts/migrate-skill-lock.ts（把 25 stable skill 的 lock 对齐到 mattpocock/skills；从 omo 迁来的用户必跑）
+   跑 smoke test 验证 git-guard 生效（参考 docs/mattpocock-skills-integration.md §5.2）
 
    验证：pi
      /simplify            # ❌ 期望未知命令（已撤 pi-simplify）
-     /skill:code-review   # ✅ omo code-review
+     /skill:code-review   # ✅ matt code-review
 EOF
 else
 cat <<EOF
