@@ -13,17 +13,23 @@
 //   git\ reset --hard                                   # 反斜杠转义
 //   GIT_PAGER=cat git -c alias.dh='reset --hard' dh    # alias 链
 //
+// 误伤修正（review 结论）：
+//   git push --force-with-lease / --force-if-includes   # 安全变体，放行（用 --force(?!-) 排除）
+//   git checkout .gitignore                             # 单文件 checkout，放行（用 \.(?:\s|$) 排除）
+//   git branch -d main                                  # 安全删除（已合并），放行（仅拦 -D）
+//   git clean -fn                                       # dry-run，放行（字符集不含 n）
+//
 // 适用：仅 Lane B（docs/omo-skills-integration.md §3B.7.2）
 // Lane A 用户不需要这个 extension——superpowers-zh / obra/superpowers / 不装 三种模板都不装 omo-skills。
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const FORBIDDEN: RegExp[] = [
-  /\bgit\s+reset\s+--hard\b/,
-  /\bgit\s+push\s+(--force|-f)\b/,
-  /\bgit\s+clean\s+-f[fd]\b/,
-  /\bgit\s+checkout\s+\.\s*$/,
-  /\bgit\s+branch\s+-D\s+main\b/,
+  /\bgit\s+reset\s+--hard\b/,                        // reset --hard
+  /\bgit\s+push\s+(?:--force(?!-)|-f)\b/,            // push --force / -f（放行 --force-with-lease / --force-if-includes）
+  /\bgit\s+clean\s+-f[dDfXx]*\b/,                    // clean -f / -fd / -ff / -fdx / -fX（-n dry-run 放行）
+  /\bgit\s+checkout\s+(?:--\s+)?\.(?:\s|$)/,         // checkout . / checkout -- .（单文件 .gitignore 放行）
+  /\bgit\s+branch\s+-D\b/,                           // branch -D 任何分支（-d 安全删除放行）
 ];
 
 export default function (pi: ExtensionAPI) {
