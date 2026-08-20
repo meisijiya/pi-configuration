@@ -1,6 +1,9 @@
 // git-guard extension
 // 拦截 bash 工具里危险 git 子命令（reset --hard / push --force / clean -fd 等）
-// 替代 omo-skills 的 git-guardrails-claude-code（在 pi 里需要重写为 extension 风格）
+// 替代 mattpocock/skills 的 misc/git-guardrails-claude-code skill。
+// matt 官方版的 git-guardrails-claude-code skill 是给 Claude Code 写 hooks JSON
+// (~/.claude/settings.json 的 PreToolUse 配置)。pi 不识别 Claude Code hooks,
+// 因此在 pi 层用本 extension 兜底：监听 pi.on("tool_call", ...) 事件直接拦截。
 //
 // 安全模型：
 // - 监听 pi.on("tool_call", ...) 事件
@@ -19,8 +22,8 @@
 //   git branch -d main                                  # 安全删除（已合并），放行（仅拦 -D）
 //   git clean -fn                                       # dry-run，放行（字符集不含 n）
 //
-// 适用：仅 Lane B（docs/omo-skills-integration.md §3B.7.2）
-// Lane A 用户不需要这个 extension——superpowers-zh / obra/superpowers / 不装 三种模板都不装 omo-skills。
+// 适用：仅 Lane B（docs/mattpocock-skills-integration.md §3B.7.2）
+// Lane A 用户不需要——superpowers-zh / obra/superpowers / 不装 三种模板都不装 matt skill。
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
