@@ -22,7 +22,7 @@
 |---|---|
 | "帮我安装这个 pi 配置仓库 `https://github.com/meisijiya/pi-configuration`" | 启动安装引导流程 |
 | "pi-configuration 怎么用？" | 解释 + 启动引导 |
-| "我想用 omo-skills" / "我想用 superpowers-zh" | 引导到 Lane 选择 + superpowers 选择 |
+| "我想用 matt skill 体系" / "我想用 superpowers-zh" | 引导到 Lane 选择 + superpowers 选择 |
 | "我想保留现在 14 个 extension" | 默认推荐 Lane A |
 | "我想减少冲突" / "我想用 matt skill 体系" | 默认推荐 Lane B |
 
@@ -44,19 +44,19 @@
 
 - **Lane A · 纯 extension 路线**（改动 0）：
   - 保留现有 14 项 PKGS + 9 个 subagent + write-guard.ts
-  - 不引入 omo-skills / matt skill 体系
+  - 不引入 matt skill 体系
   - 适合：偏好 agent 独立上下文 / 不想引入 skill 体系 / 已用熟 superpowers-zh 的 using-superpowers bootstrap
   - 触发习惯：`/simplify` 仍可用 / 9 个 agent description 自动触发
 
 - **Lane B · 部分 extension + matt skill 微调**（改动 9 项）：
   - 撤 `superpowers-zh` / `pi-simplify` / 2 个 agent（`tdd-guide` + `code-reviewer`）
-  - 加 `git:github.com/meisijiya/omo-skills` 装载源 + 新写 `extensions/git-guard.ts` + `scripts/migrate-skill-lock.ts`
-  - 装 omo-skills 25 个 skill（带 14 个 description 守卫降低撞车）
+  - 加 `git:github.com/mattpocock/skills` 装载源（经 packages filter 装 25 stable）+ 自写 `extensions/git-guard.ts`（替代 matt 的 misc/git-guardrails-claude-code skill）+ `scripts/migrate-skill-lock.ts`（OVERRIDDEN 表 25 项）
+  - 装 mattpocock/skills 25 stable skill（engineering 18 + productivity 7，跳 misc/recipes；**无 description 守卫**，撞车风险↑，D1 决策接受）
   - 适合：接受 skill 触发模式 / 想用 description 守卫降低撞车风险
   - 触发习惯：`/simplify` 改为 `/skill:code-review` / 25 个 omo skill 部分 user-invoked
 
 **问用户**（不要替选）：
-> "你想选 Lane A 还是 Lane B？A 是纯 extension 不变，B 是撤冲突项加装 omo-skills 25 skill。详见 [docs/omo-skills-integration.md](docs/omo-skills-integration.md) §0 TL;DR。"
+> "你想选 Lane A 还是 Lane B？A 是纯 extension 不变，B 是撤冲突项加装 mattpocock/skills 25 stable skill。详见 [docs/mattpocock-skills-integration.md](docs/mattpocock-skills-integration.md) §0 TL;DR。"
 
 **用户答 A** → 进入决策 2（superpowers 选择）
 **用户答 B** → 跳到 §3 安装步骤（cp `presets/settings.lane-b.json`）
@@ -109,7 +109,7 @@
 | 已有 superpowers-zh | cp `presets/settings.lane-a.zh.json`（覆盖现有 settings.json；部署脚本自动备份） |
 | 已有 `obra/superpowers` | cp `presets/settings.lane-a.en.json` |
 | 已有自己的 subagent | cp `presets/settings.lane-a.bare.json`（撤 superpowers 让用户自己装），然后手动合并 subagent |
-| 已有 omo-skills | cp `presets/settings.lane-b.json`，跑 INSTALL.md §5b-d Lane B 额外步骤 |
+| 已有 matt skill 体系 | cp `presets/settings.lane-b.json`，跑 INSTALL.md §5b-d Lane B 额外步骤 |
 
 **注意**：**永远先备份再覆盖**——INSTALL.md §2 用 `cp ... "$BACKUP_DIR"` 保证可回滚。
 
@@ -132,11 +132,11 @@
 
 | 用户问 | 引导到 |
 |---|---|
-| "Lane A vs B 区别？" | [docs/omo-skills-integration.md §0 TL;DR](docs/omo-skills-integration.md#0-tldr双路线版) |
-| "为什么撤 superpowers-zh？" | [docs/omo-skills-integration.md §2.3 A](docs/omo-skills-integration.md#2-冲突分析方法层--共享) |
-| "omo-skills 是什么？" | [docs/omo-skills-integration.md §1.2](docs/omo-skills-integration.md#12-omo-skills-目标层25-skill--lane-b-引用) |
-| "git-guard 是干嘛的？" | [docs/omo-skills-integration.md §3B.7.2](docs/omo-skills-integration.md#3b72-git-guardts-新增仅-lane-b--lane-2-骨架) |
-| "write-guard 误拦截怎么修？" | [docs/omo-skills-integration.md §3B.7.1](docs/omo-skills-integration.md#3b71-write-guardts-description-修复两-lane-都修--lane-123-整合) |
+| "Lane A vs B 区别？" | [docs/mattpocock-skills-integration.md §0 TL;DR](docs/mattpocock-skills-integration.md#0-tldr双路线版) |
+| "为什么撤 superpowers-zh？" | [docs/mattpocock-skills-integration.md §2.3 A](docs/mattpocock-skills-integration.md#2-冲突分析方法层--共享) |
+| "mattpocock/skills 是什么？" | [docs/mattpocock-skills-integration.md §1.2](docs/mattpocock-skills-integration.md#12-mattpocockskills-目标层25-stable-skill--lane-b-引用) |
+| "git-guard 是干嘛的？" | [docs/mattpocock-skills-integration.md §3B.7.2](docs/mattpocock-skills-integration.md#3b72-git-guardts-已有仅-lane-b--沿用-v1-lane-2-骨架) |
+| "write-guard 误拦截怎么修？" | [docs/mattpocock-skills-integration.md §3B.7.1](docs/mattpocock-skills-integration.md#3b71-write-guardts-description-修复两-lane-都修--沿用-v1) |
 | "决策 9 superpowers 选择细节？" | [docs/decisions.md §决策 9](docs/decisions.md#决策-9superpowers-由用户选择中文版还是英文版) |
 | "INSTALL.md 步骤细节？" | [INSTALL.md](INSTALL.md) |
 | "怎么在 preset 之间切换？" / "已装好了想换 Lane" | [docs/configuration-switching.md](docs/configuration-switching.md) |
@@ -157,4 +157,4 @@
 
 ---
 
-**文档结束。本协议是 Agent 引导用户的入口——所有具体执行步骤见 [INSTALL.md](INSTALL.md)，所有设计决策见 [docs/omo-skills-integration.md](docs/omo-skills-integration.md) + [docs/decisions.md](docs/decisions.md)。**
+**文档结束。本协议是 Agent 引导用户的入口——所有具体执行步骤见 [INSTALL.md](INSTALL.md)，所有设计决策见 [docs/mattpocock-skills-integration.md](docs/mattpocock-skills-integration.md) + [docs/decisions.md](docs/decisions.md)。**
