@@ -8,7 +8,7 @@
 // 因此本 extension 无法区分"主对话"与"spec-miner 子 agent"。
 //
 // 后果：若按旧版全局硬拦截，会误拦主对话（以及所有未排除本扩展的 subagent）的
-// 每一次 write/edit——实测已复现（见 docs/omo-skills-integration.md §4.7）。
+// 每一次 write/edit——实测已复现（见 docs/mattpocock-skills-integration.md §4.7）。
 //
 // 当前行为：
 // - 默认（未设置 WRITE_GUARD_STRICT）→ 完全放行，等价于 no-op，安全无副作用。
