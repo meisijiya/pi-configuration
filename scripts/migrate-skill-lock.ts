@@ -1,6 +1,7 @@
 // migrate-skill-lock.ts (standalone script)
-// 同步 ~/.agents/.skill-lock.json：把被 omo-skills 覆盖的 skill 的 lock 条目
-// 从旧 source（mattpocock/skills）改指向 omo-skills，并更新 skillFolderHash。
+// 同步 ~/.agents/.skill-lock.json：把 25 个 mattpocock/skills stable skill 的 lock 条目
+// 统一指向 mattpocock/skills 源 + 更新 skillFolderHash（git tree SHA）。
+// 适用于从 omo-skills 时代迁来的用户（lock 中可能含 meisijiya/skills 域条目）。
 //
 // 关键事实（旧版实现有错，这里修正）：
 // .skill-lock.json（skills CLI v3 全局 lock）里，sourceType=github 的条目，
@@ -29,13 +30,36 @@ import { homedir } from "os";
 
 const LOCK = process.env.SKILL_LOCK_PATH ?? join(homedir(), ".agents/.skill-lock.json");
 
-// 被 omo-skills 覆盖的 skill：skill 名 → 新 source + 新 sourceUrl。
-// 未来发现更多被覆盖的 skill，在此处加。
+// mattpocock/skills 25 个 stable skill → 统一指向 mattpocock/skills 源。
+// (engineering 18 + productivity 7,跳过 misc/recipes/in-progress)
 const OVERRIDDEN: Record<string, { source: string; sourceUrl: string }> = {
-  handoff: {
-    source: "meisijiya/omo-skills",
-    sourceUrl: "https://github.com/meisijiya/omo-skills.git",
-  },
+  // engineering 18
+  "ask-matt":                      { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "code-review":                   { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "codebase-design":               { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "diagnosing-bugs":               { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "domain-modeling":               { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "grill-with-docs":               { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "implement":                     { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "improve-codebase-architecture": { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "prototype":                     { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "research":                      { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "resolving-merge-conflicts":     { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "setup-matt-pocock-skills":      { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "tdd":                           { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "to-spec":                       { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "to-tickets":                    { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "triage":                        { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "wayfinder":                     { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "wizard":                        { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  // productivity 7
+  "grill-me":                      { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "grilling":                      { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "handoff":                       { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "teach":                         { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "to-questionnaire":              { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "wait-what":                     { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
+  "writing-for-agents":            { source: "mattpocock/skills", sourceUrl: "https://github.com/mattpocock/skills.git" },
 };
 
 interface SkillEntry {
@@ -120,8 +144,9 @@ async function migrate(): Promise<void> {
         continue;
       }
 
-      if (entry.source === mapping.source && entry.skillFolderHash === sha) {
-        console.log(`✓  ${skill} 已迁移过 (source: ${mapping.source}, sha: ${sha})`);
+      // 已对齐到 mattpocock/skills:跳过;其他源(包括 meisijiya/omo-skills / 其他):更新
+      if (entry.source === "mattpocock/skills" && entry.skillFolderHash === sha) {
+        console.log(`✓  ${skill} 已对齐到 mattpocock/skills (sha: ${sha})`);
         continue;
       }
 
