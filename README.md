@@ -23,6 +23,8 @@
 | `settings.lane-a.bare.json` | A | 13 | 不装 superpowers（用户自己后续装） |
 | `settings.lane-b.json` | B | 13 | 装 mattpocock/skills 25 stable skill 的官方版微调路线 |
 
+仓库还包含 **9 个 subagent**（[agents/](agents/)）+ **2 个自写 extension**（[extensions/](extensions/): `write-guard.ts` 两 lane 都装 / `git-guard.ts` 仅 Lane B）。
+
 **完整设计背景**：[docs/mattpocock-skills-integration.md](docs/mattpocock-skills-integration.md)（3 lane 独立复审后的双路线版；装载源 = mattpocock/skills 官方版）。
 
 ---
@@ -46,8 +48,11 @@
 | AGENTS.md | `@mrclrchtr/supi-claude-md` | 教 agent 主动维护 CLAUDE.md / AGENTS.md |
 | Diff review | `pi-simplify` | `/simplify` 只审 diff |
 | 安全模式 | `pi-plan-mode` | `/plan` toggle，写工具屏蔽 + AI 过滤 bash |
+| 上下文 | `pi-context-view` / `pi-system-prompt` / `pi-context-breakup` | 3 个 pi-* 命名 npm 包（不是 pi 内置）：上下文可视化 / 系统 prompt 增强 / 上下文分段 |
 
-合计 11 个外部扩展包（加 3 个 pi 内置）= 14 个。
+合计 14 个 npm 包（11 个外部扩展 + 3 个 pi-* 命名包）+ 2 个 git 源（`codegraph-pi` / `pi-lsp-client`）。
+
+**Lane B 变更**（如选 `settings.lane-b.json`）：撤 `superpowers-zh` + `pi-simplify` 共 2 个 npm 包，撤 `agents/tdd-guide.md` + `agents/code-reviewer.md` 共 2 个 subagent，加 `git:github.com/mattpocock/skills` 装载源（pi convention 自动发现 25 stable skill）+ `extensions/git-guard.ts`（替代 matt `misc/git-guardrails-claude-code` skill）。详见 [决策 10](docs/decisions.md#决策-10mattpocockskills-官方版集成-lane-b-双路线版) + [docs/mattpocock-skills-integration.md](docs/mattpocock-skills-integration.md)。
 
 ## 快速开始
 
@@ -94,17 +99,17 @@ cp tasks-project.json /your/project/.pi/tasks-config.json
 ## 验证
 
 ```bash
-pi list    # 期望 14 个已装包（Lane A）/ 13 个（Lane B / bare）
+pi list    # 期望 14 个已装包（Lane A.zh/en）/ 13 个（Lane A.bare / Lane B）
 
-# 测工具链
+# 测工具链（按 lane 区分）
 pi
-> /plan                 # pi-plan-mode toggle
-> /tasks                # pi-tasks widget 出现
-> /simplify             # pi-simplify
-> /websearch react      # pi-web-access 零配置可用
+> /plan                 # 两 lane 都可用（pi-plan-mode）
+> /tasks                # 两 lane 都可用（pi-tasks widget）
+> /simplify             # 仅 Lane A 可用（Lane B 已撤 pi-simplify，换为 /skill:code-review）
+> /websearch react      # 两 lane 都可用（pi-web-access）
 > how does auth work    # codegraph 自动激活
 > resolve-library-id next.js   # context7
-> help me plan this feature    # superpowers brainstorming
+> help me plan this feature    # Lane A: superpowers brainstorming；Lane B: 改 /skill:grill-me
 > show type errors in src/foo.ts  # lsp
 ```
 
@@ -113,18 +118,32 @@ pi
 ```
 pi-configuration/
 ├── README.md                 ← 本文件
+├── AGENTS.md                 Agent 引导协议（决策树）
+├── INSTALL.md                安装协议（6 步流程）
 ├── .gitignore
 ├── LICENSE                   MIT
-├── settings.json             模板 → ~/.pi/agent/settings.json
+├── settings.json             仓库根默认 preset（= Lane A.zh；手动部署参考用）
 ├── mcp.json                  模板 → ~/.pi/agent/mcp.json
 ├── tasks-global.json         模板 → ~/.pi/agent/tasks-config.json
 ├── web-search.json           模板 → ~/.pi/web-search.json
 ├── tasks-project.json        模板 → 项目 .pi/tasks-config.json
-├── deploy.sh                 一键部署脚本
-├── install-packages.sh       只跑 pi install
+├── deploy.sh                 一键部署脚本（按 preset 部署 settings + agents + extensions + pi install）
+├── install-packages.sh       只跑 pi install（已部署后补装用）
+├── presets/                  4 个 settings 模板（按 lane 切分）
+│   ├── settings.lane-a.zh.json     默认中文 superpowers
+│   ├── settings.lane-a.en.json     英文原版 superpowers
+│   ├── settings.lane-a.bare.json   不装 superpowers
+│   └── settings.lane-b.json        mattpocock/skills 官方版
+├── agents/                   9 个 subagent（Lane B 撤 2：tdd-guide / code-reviewer）
+├── extensions/               2 个自写 extension
+│   ├── write-guard.ts        两 lane 都装（默认放行；WRITE_GUARD_STRICT=1 启用白名单）
+│   └── git-guard.ts          仅 Lane B（拦截危险 git 子命令）
+├── scripts/                  1 个 standalone 脚本（不归 pi 自动加载）
+│   └── migrate-skill-lock.ts Lane B 必跑（同步 .skill-lock.json 25 项）
 └── docs/
     ├── decisions.md          关键决策记录
     ├── configuration-switching.md  配置切换指南（preset 之间切换）
+    ├── mattpocock-skills-integration.md  Lane B 完整设计（3 lane 复审定稿）
     └── troubleshooting.md    常见问题
 ```
 
@@ -133,7 +152,7 @@ pi-configuration/
 | 决策 | 选择 | 理由 |
 |---|---|---|
 | **npm 版本策略** | `@latest`（不 pin 具体版本） | npm registry 有 cryptographic signature，trust npm 自动滚到最新 |
-| **git 源策略** | 不 pin SHA（用 default branch） | 接受 trust maintainer 的 tradeoff。2 个 git 源都是知名作者 |
+| **git 源策略** | 不 pin SHA（用 default branch） | 接受 trust maintainer 的 tradeoff。Lane A.zh：2 个 git 源；Lane A.en：3 个（+ obra/superpowers）；Lane B：3 个（+ mattpocock/skills）。都是知名作者 |
 | **superpowers 版本** | 默认 `superpowers-zh`（中文增强版） | skill 中文化 + 6 个国内原创 skill；可切回 `obra/superpowers`（见 [决策 9](docs/decisions.md#决策-9superpowers-选中文增强版superpowers-zh)） |
 | **npmCommand** | 不设 | bash -c 透传参数有 bug（详见 troubleshooting）；直接靠 nvm 的交互 shell PATH |
 | **任务配置两层** | 全局 baseline + 项目 override | `taskScope: session` 默认；项目里改成 `project` 共享任务 |
@@ -152,7 +171,11 @@ pi-configuration/
 
 ## 安全性
 
-- **2 个 git 源（codegraph-pi / pi-lsp-client）** 不 pin SHA，等于 trust GitHub transport + 仓库作者。superpowers 走 npm（`superpowers-zh`），签名校验由 npm registry 处理。要更安全，改成 pin SHA（具体 SHA 历史上轮对话里有）。
+- **git 源不 pin SHA**：
+  - Lane A.zh：2 个 git 源（`codegraph-pi` / `pi-lsp-client`），superpowers 走 npm（`superpowers-zh`），签名校验由 npm registry 处理。
+  - Lane A.en：3 个 git 源（+ `obra/superpowers`）。
+  - Lane B：3 个 git 源（`codegraph-pi` / `pi-lsp-client` + `mattpocock/skills`）。
+  - 等于 trust GitHub transport + 仓库作者。要更安全，改成 pin SHA（pin 法见 [决策 1](docs/decisions.md#决策-1npm-用-latestgit-不-pin-sha)）。
 - **API key 走环境变量**：`web-search.json` 用 `$VAR` 引用、`mcp.json` 的 GitHub token 也用 `$GITHUB_TOKEN`。**不要把任何 key 提交进仓库**。
 - **mcp.json 和 web-search.json 部署后是 600 权限**。
 - **pi 包有完整 system access**（pi 官方文档明示）。装第三方包前 review 一下源码。
@@ -171,7 +194,7 @@ grep -E '(sk-|pplx-|gho_|gsk_|ctx7sk_|key-)' ~/.pi/*.json ~/.pi/agent/*.json \
   && echo "❌ 检出硬编码 key" || echo "✅ 没硬编码 key"
 
 # 确认 git 包是 trusted source
-pi list | grep '^git:'    # Lane A：2 个（codegraph-pi / pi-lsp-client，superpowers 走 npm）；Lane B：3 个（+ mattpocock/skills）
+pi list | grep '^git:'    # Lane A.zh: 2 个（codegraph-pi / pi-lsp-client）；Lane A.en: 3 个（+ obra/superpowers）；Lane B: 3 个（+ mattpocock/skills）
 ```
 
 ## 参考
@@ -179,6 +202,7 @@ pi list | grep '^git:'    # Lane A：2 个（codegraph-pi / pi-lsp-client，supe
 - pi 官方文档：https://pi.dev
 - 调研记录（中文）：见 `docs/decisions.md`
 - 配置切换指南：见 `docs/configuration-switching.md`
+- Lane B 完整设计：见 `docs/mattpocock-skills-integration.md`
 - 排查手册：见 `docs/troubleshooting.md`
 
 ## License

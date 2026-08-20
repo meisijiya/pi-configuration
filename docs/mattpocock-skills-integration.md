@@ -32,7 +32,7 @@
    - **§4.7 write-guard 误拦截**:两 lane 都修过(默认放行 + WRITE_GUARD_STRICT=1 才启用白名单)。
 5. **§3 实施关键修正**(沿用 v1):
    - **§3.3 settings.json 注释**:`extensions` 是加载列表,`packages` 是 trust 声明,二者可重叠(重复声明无害)。
-   - **v1 的"算术 bug"**: `9 个外部扩展包 + 1 个 skill 源 + 3 个内置 = 13 个`(Lane B)。
+   - **v1 的"算术 bug"**: Lane B packages 实际 = **10 个 npm 包 + 2 个 git 源 + 1 个 mattpocock/skills 装载源 = 13 个**。v1 文档的"9+1+3=13"分项与实际不一致。
 6. **不可被任何 lane 取代的扩展**(两 lane 共保留):`codegraph-pi` / `pi-lsp-client` / `context7-pi` / `pi-tasks` / `pi-subagents` / `pi-web-access` / `pi-mcp-extension` / `supi-claude-md` / `pi-plan-mode` + 3 个内置(`pi-system-prompt` / `pi-context-view` / `pi-context-breakup`) + 自写 `write-guard.ts`。
 7. **不可被任何 lane 取代的 subagent**(两 lane 共保留):`agent-evaluator` / `harness-optimizer` / `security-reviewer` / `build-error-resolver` / `silent-failure-hunter` + **Lane B 还保留** `spec-miner` / `explore`(Lane 1 修正沿用)。
 
@@ -50,7 +50,7 @@
 | `pi-context-view` | 上下文可视化 |
 | `pi-context-breakup` | 上下文分段 |
 
-**12 个外部 npm 包 + 1 个 git 装载源 + pi convention 自动发现 matt 仓库 `skills/` 下 25 stable**:
+**9 个外部 npm 包 + 2 个 git 源 + 1 个 mattpocock/skills 装载源 + pi convention 自动发现 matt 仓库 `skills/` 下 25 stable**（加上表外的 3 个 pi-* 命名 npm 包，合计 12 npm + 3 git）：
 
 | 包 | 类别 | 作用 |
 |---|---|---|
@@ -415,7 +415,7 @@ PKGS=(
 ### 3B.5 README.md 变更(沿用 v1)
 
 - 顶部扩展表"方法论"行:`superpowers-zh` → `mattpocock/skills`("25 个 stable skill 装载源,详见 [决策 10](docs/decisions.md#决策-10mattpocockskills-官方版集成-lane-b-双路线版)")
-- **核心数字**:"合计 11 个外部扩展包 + 3 个内置 = 14" → **"合计 9 个外部扩展包 + 1 个 skill 源 + 3 个内置 = 13 个"**(v1 算术 bug 已修:`9+1+3 = 13` ✓)
+- **核心数字**:"合计 11 个外部扩展包 + 3 个内置 = 14" → **"合计 10 个 npm 包 + 2 个 git 源 + 1 个 mattpocock/skills 装载源 = 13 个"**(v1 算术 bug 已修:`10+2+1 = 13` ✓)
 - 验证清单:slash commands 部分移除 `/simplify`;新增 `/skill:code-review` / `/skill:grill-me` 等触发语说明
 - 加一节"matt skill 装载":packages filter 说明 + `/skill:setup-matt-pocock-skills` 必跑提示
 

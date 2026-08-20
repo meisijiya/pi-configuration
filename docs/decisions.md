@@ -91,9 +91,9 @@ bash -c "source ... && npm" install <pkg> --prefix ... --legacy-peer-deps
 
 ---
 
-## 决策 4：包列表（11 个外部 + 3 个内置）
+## 决策 4：包列表（11 个外部 + 3 个 pi-* 命名）
 
-**经过几轮调研砍到 11 个**：
+**经过几轮调研砍到 11 个外部 npm 包**：
 
 | 包 | 角色 | 为什么必装 |
 |---|---|---|
@@ -109,7 +109,7 @@ bash -c "source ... && npm" install <pkg> --prefix ... --legacy-peer-deps
 | `pi-simplify` | Diff review | `/simplify` 只审 diff |
 | `pi-plan-mode` | 安全模式 | `/plan` toggle，read-only 安全网 |
 
-**3 个 pi 内置包（保留）**：
+**3 个 pi-* 命名 npm 包（保留）**（不是 pi 内置，也是 npm: 源）：
 
 | 包 | 作用 |
 |---|---|
@@ -205,7 +205,7 @@ grep -E '(sk-|pplx-|gho_|gsk_|ctx7sk_)' ~/.pi/*.json ~/.pi/agent/*.json
 | `settings.lane-a.zh.json` | A | `npm:superpowers-zh@latest` | 14 | 中文工作流（决策 9 历史默认） |
 | `settings.lane-a.en.json` | A | `git:github.com/obra/superpowers` | 14 | 英文原版 superpowers |
 | `settings.lane-a.bare.json` | A | （无） | 13 | 不装 superpowers（用户自己后续装） |
-| `settings.lane-b.json` | B | （撤除） | 13 | 装 omo-skills 25 skill（强制撤 superpowers） |
+| `settings.lane-b.json` | B | （撤除） | 13 | 装 mattpocock/skills 25 stable skill（强制撤 superpowers） |
 
 **为什么改默认**：
 

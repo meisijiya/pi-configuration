@@ -41,7 +41,7 @@ echo "✅ 备份到 $BACKUP"
 | A.en → A.zh | `git:github.com/obra/superpowers` | `npm:superpowers-zh@latest` | 无 |
 | A.zh/A.en → A.bare | `npm:superpowers-zh`（或 `git:github.com/obra/superpowers`） | — | 无 |
 | A.bare → A.zh/A.en | — | `npm:superpowers-zh@latest`（或 obra） | 无 |
-| A → B | `npm:superpowers-zh`（或 obra）+ `npm:pi-simplify` | `git:github.com/mattpocock/skills` | 撤 2 agent + 加 2 extension + 装载 matt skill（见 §4） |
+| A → B | `npm:superpowers-zh`（或 obra）+ `npm:pi-simplify` | `git:github.com/mattpocock/skills` | 撤 2 agent + 加 1 extension + 1 standalone script + 装载 matt skill（见 §4） |
 | B → A | `git:github.com/mattpocock/skills` | `npm:superpowers-zh@latest`（或 obra）+ `npm:pi-simplify` | 加回 2 agent（见 §5） |
 
 ---
@@ -110,7 +110,7 @@ pi remove npm:pi-simplify
 # 4.3 装 mattpocock/skills 装载源（经 packages filter 装 25 stable）
 pi install git:github.com/mattpocock/skills
 
-# 4.4 撤 2 个被 omo 覆盖的 agent
+# 4.4 撤 2 个被 matt 覆盖的 agent
 rm -f ~/.pi/agent/agents/tdd-guide.md ~/.pi/agent/agents/code-reviewer.md
 
 # 4.5 部署 Lane B 新增的 git-guard extension（若还没部署；deploy.sh 已自动做）
@@ -134,8 +134,8 @@ node "$REPO_ROOT/scripts/migrate-skill-lock.ts"
 ```bash
 pi
 > /simplify            # ❌ 期望未知命令（pi-simplify 已撤）
-> /skill:code-review   # ✅ omo code-review
-> /skills              # 应见 25 个 omo skill + 7 个 subagent
+> /skill:code-review   # ✅ matt code-review
+> /skills              # 应见 25 个 matt skill + 7 个 subagent
 ```
 
 ---
