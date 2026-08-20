@@ -1,5 +1,32 @@
 # pi-configuration
 
+
+## 给 AI Agent 使用（必读）
+
+> 本节专门写给 **AI Agent**（如 pi / Claude Code / Cursor）。如果你是人类读者，跳到 [## 这是什么](#这是什么)。
+
+**如果用户把本仓库 GitHub 地址 paste 给你**：
+
+1. **先读 [AGENTS.md](AGENTS.md)**——本文档是给你的引导协议，告诉你要引导用户做哪些决策、如何按 [INSTALL.md](INSTALL.md) 执行安装。
+2. **决策点**：用 [AGENTS.md §3 决策树](AGENTS.md#3-安装步骤始终执行) 引导用户选：
+   - **Lane A 纯 extension**（保留 14 项 PKGS 不变） vs **Lane B 部分 extension + matt skill 微调**（撤冲突项加 omo-skills 25 skill）
+   - 如果选 Lane A：superpowers 用 **中文版（superpowers-zh）** / **英文原版（obra/superpowers）** / **不装**
+3. **按 [INSTALL.md](INSTALL.md) 执行 6 步安装**——前置检查 / 备份 / cp 用户选定的 settings 模板 / 部署 agents+extensions / 跑 deploy.sh / 验证。
+4. **不要自动执行破坏性操作**——每步前先告知用户，特别是 `cp` 覆盖前 / `rm -rf` 前 / `pi install` 前。
+
+**4 个 settings 模板**（[presets/](presets/) 目录）：
+
+| 模板 | Lane | PKGS 项数 | 适用 |
+|---|---|---|---|
+| `settings.lane-a.zh.json` | A | 14 | 默认中文工作流（决策 9 历史默认） |
+| `settings.lane-a.en.json` | A | 14 | 英文原版 superpowers 工作流 |
+| `settings.lane-a.bare.json` | A | 13 | 不装 superpowers（用户自己后续装） |
+| `settings.lane-b.json` | B | 13 | 装 omo-skills 25 skill 的微调路线 |
+
+**完整设计背景**：[docs/omo-skills-integration.md](docs/omo-skills-integration.md)（3 lane 独立复审后的双路线版）。
+
+---
+
 完整的 pi (Mario Zechner / badlogic) 扩展栈配置。涵盖代码理解、文档查询、任务编排、研究工具、LSP、质量门——一个仓库配齐。
 
 ## 这是什么

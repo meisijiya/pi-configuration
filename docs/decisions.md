@@ -192,43 +192,119 @@ grep -E '(sk-|pplx-|gho_|gsk_|ctx7sk_)' ~/.pi/*.json ~/.pi/agent/*.json
 
 ---
 
-## 决策 9：superpowers 选中文增强版（superpowers-zh）
+## 决策 9：superpowers 由用户选择中文版还是英文版
 
-**选择**：默认装 `npm:superpowers-zh@latest`，英文原版 `git:github.com/obra/superpowers` 留作可切换备选。
+**选择**：**不写死默认**——由用户在安装时按 [AGENTS.md](../AGENTS.md) §3 决策树选择 4 种 settings 模板之一。
 
-**两个选项**：
+**4 个模板**（[presets/](../presets/) 目录）：
 
-| 选项 | 来源 | 内容 |
-|---|---|---|
-| 英文原版 | `git:github.com/obra/superpowers` | 上游 `obra/superpowers` 全部 skill（英文） |
-| **中文增强版**（默认） | `npm:superpowers-zh` 或 `git:github.com/jnMetaCode/superpowers-zh` | 上游 14 个 skill 中英对照 + 6 个国内原创 skill：mcp-builder / workflow-runner / chinese-code-review / chinese-git-workflow / chinese-documentation / chinese-commit-conventions |
+| 模板 | Lane | superpowers 源 | PKGS 项数 | 适用 |
+|---|---|---|---|---|
+| `settings.lane-a.zh.json` | A | `npm:superpowers-zh@latest` | 14 | 中文工作流（决策 9 历史默认） |
+| `settings.lane-a.en.json` | A | `git:github.com/obra/superpowers` | 14 | 英文原版 superpowers |
+| `settings.lane-a.bare.json` | A | （无） | 13 | 不装 superpowers（用户自己后续装） |
+| `settings.lane-b.json` | B | （撤除） | 13 | 装 omo-skills 25 skill（强制撤 superpowers） |
 
-**Pi 集成方式完全一致**：都在 `package.json` 里声明 `pi` 字段。两条 `pi install` 命令装出来的运行时体验、目录结构、skill 调用入口都一样——只是 skill 内容中文化和扩展。
+**为什么改默认**：
 
-**为什么默认中文增强版**：
-- skill 描述、SKILL.md、触发提示全中文化，跟 pi 主对话语言一致
-- 6 个国内原创 skill 覆盖国内工程化刚需（中文 commit / 中文文档 / Gitee 等国内 Git 平台 / 中文代码审查 / MCP 构建 / 多 agent workflow）
-- 14 个翻译 skill 用 `brainstorming → TDD → systematic-debugging` 等关键流程技能时，中文描述降低误触发
+- 决策 9 历史默认"中文增强版"假设用户偏向中文工作流；实际用户偏好各异（国内英文团队、海外华人、出海产品等）
+- `superpowers-zh` 有 6 个国内原创 skill（mcp-builder / workflow-runner / chinese-code-review / chinese-git-workflow / chinese-documentation / chinese-commit-conventions）——这些是国内工作流的强需求；但对海外用户是冗余
+- 4 个模板 cp 工作流让用户决策点明确、复现性好
 
-**切换命令**（任选其一）：
+**用户决策流程**：
 
-```bash
-# 中文 → 英文
-pi remove npm:superpowers-zh
-pi install git:github.com/obra/superpowers
-
-# 英文 → 中文
-pi remove git:github.com/obra/superpowers
-pi install npm:superpowers-zh@latest
-```
+1. 用户 paste 仓库地址给 Agent
+2. Agent 读 [AGENTS.md](../AGENTS.md) §3 决策树
+3. Agent 引导用户选 Lane A / B
+4. 选 A → Agent 再问 superpowers 中文 / 英文 / 不装
+5. Agent 按用户决策 cp 对应模板到 `~/.pi/agent/settings.json`
+6. Agent 跑 [INSTALL.md](../INSTALL.md) §3-6 完成部署
 
 **对本仓库的影响**：
 
 | 文件 | 变化 |
 |---|---|
-| `install-packages.sh` / `deploy.sh` 的 `PKGS` 数组 | `git:github.com/obra/superpowers` → `npm:superpowers-zh@latest`，行尾加注释指向本决策 |
-| git 源数量 | 3 个 → 2 个（少 superpowers，剩 codegraph-pi / pi-lsp-client）。README 安全 checklist 已同步 |
-| 脚本输出 | 完成后打印一行切换提示 |
-| 包总数 | 不变（11 外部 + 3 内置 = 14） |
+| `presets/settings.lane-a.zh.json` 等 4 个 | 新增（用户可选配置） |
+| [AGENTS.md](../AGENTS.md) | 新增（引导协议） |
+| [INSTALL.md](../INSTALL.md) | 新增（安装协议） |
+| `settings.json`（仓库根） | 保留作为"默认 = Lane A.zh"（当前已部署状态）；不强制使用 |
+| `deploy.sh` PKGS 数组 | **不变**（仍装 `superpowers-zh`）；但用户 cp 模板后会被覆盖 |
+| `README.md` 顶部"方法论"行 | 改为"用户选择中文 / 英文 / 不装"（见 [README.md §这是什么](../README.md#这是什么)） |
 
-**前提假设**：用户已经倾向中文工作流。如果团队是英文环境，把默认换回 `git:github.com/obra/superpowers` 即可，所有引用 README 里"决策 9"的交叉引用仍然成立。
+**切换命令**（已装后的切换，不再用 `pi remove` + `pi install`）：
+
+```bash
+# 当前是中文版，想切英文
+cp /path/to/pi-configuration/presets/settings.lane-a.en.json ~/.pi/agent/settings.json
+pi remove npm:superpowers-zh
+pi install git:github.com/obra/superpowers
+bash /path/to/pi-configuration/deploy.sh
+
+# 当前是英文版，想切中文
+cp /path/to/pi-configuration/presets/settings.lane-a.zh.json ~/.pi/agent/settings.json
+pi remove git:github.com/obra/superpowers
+pi install npm:superpowers-zh@latest
+bash /path/to/pi-configuration/deploy.sh
+
+# 切到不装 superpowers
+cp /path/to/pi-configuration/presets/settings.lane-a.bare.json ~/.pi/agent/settings.json
+pi remove npm:superpowers-zh   # 或 git:github.com/obra/superpowers
+bash /path/to/pi-configuration/deploy.sh
+```
+
+**前提假设**：用户希望自己决策 superpowers 版本，而非被仓库默认决定。如果团队偏好统一，把对应模板内容复制到 `settings.json`（仓库根），把 `deploy.sh` PKGS 数组写死该模板的 PKGS 即可。
+
+---
+
+## 决策 10：omo-skills 集成（Lane B 双路线版）
+
+**选择**：仓库提供 **两条并行路线**——Lane A 纯 extension / Lane B 部分 extension + matt skill 微调——通过 4 个 settings 模板 + [docs/omo-skills-integration.md](omo-skills-integration.md) 完整设计文档双呈现。
+
+**两条路线差异**：
+
+| 维度 | Lane A | Lane B |
+|---|---|---|
+| 改动量 | 0 | 9 项 |
+| PKGS 项数 | 14（3 模板）/ 13（bare） | 13 |
+| 撤 agent | 0 | 2（tdd-guide / code-reviewer——**注意**：原调研稿写撤 4 个，复审修正为撤 2 个，详见 [docs/omo-skills-integration.md §2.2](omo-skills-integration.md#22-按冲突类型逐项判定修正版--lane-1-复审)） |
+| 撤 npm 扩展 | 0 | 2（superpowers-zh / pi-simplify） |
+| 加 git 源 | 0 | 1（meisijiya/omo-skills） |
+| 加自写 extension | 0 | 2（git-guard.ts / migrate-skill-lock.ts） |
+| 修 write-guard.ts | 是（description + caller 判定） | 是 |
+| 适用 | 偏好 agent 独立上下文 / 不想引入 skill 体系 | 接受 skill 触发模式 + 用 description 守卫降低撞车 |
+
+**为什么两条并存而非二选一**：
+
+- 用户偏好不同——有人想用 superpowers 的 using-superpowers bootstrap 强约束，有人想用 omo 的 on-demand 触发模型
+- Lane B 的撤 agent 数（4 → 2）经过 3 lane 独立复审修正——`spec-miner` / `explore` 与 omo 对应 skill 方向正交，不应撤
+- Lane A 不动是尊重"现状已能用"——避免给不愿迁移的用户增加成本
+
+**用户决策流程**：
+
+1. 用户 paste 仓库地址给 Agent
+2. Agent 读 [AGENTS.md §3 决策树](../AGENTS.md#3-安装步骤始终执行)
+3. Agent 引导用户选 Lane A / B
+4. 选 A → 进入决策 2（superpowers 中文 / 英文 / 不装）→ cp 模板
+5. 选 B → cp `presets/settings.lane-b.json` → 跑 [INSTALL.md §5 Lane B 额外步骤](../INSTALL.md#5-跑-deploysh)
+
+**对本仓库的影响**：
+
+| 文件 | 变化 |
+|---|---|
+| `presets/settings.lane-b.json` | 新增 |
+| [docs/omo-skills-integration.md](omo-skills-integration.md) | 新增（完整设计，769 行 / 41.9K） |
+| [AGENTS.md](../AGENTS.md) / [INSTALL.md](../INSTALL.md) | 新增（决策树 + 6 步安装） |
+| `extensions/write-guard.ts` | description 修复（caller 维度） |
+| `extensions/git-guard.ts` | 新增（Lane B 必装） |
+| `extensions/migrate-skill-lock.ts` | 新增（Lane B 必装） |
+| `agents/` | Lane B 撤 tdd-guide.md / code-reviewer.md（仓库里删，deploy.sh 自动不拷贝） |
+| 决策 9（中文 / 英文 / 不装选择） | 与本决策正交——Lane A 内部还要选 superpowers |
+
+**关键设计原则**：
+
+1. **不替用户决策**——4 个模板 + 决策树让用户自决
+2. **改动可逆**——每个模板都是独立文件，回滚 = cp 上一个模板
+3. **复现性优先**——INSTALL.md 6 步明确，cp + deploy.sh 让任何机器能复现
+4. **配置即代码**——`presets/` 4 个模板 + `extensions/` 自写 + `agents/` 9 个声明式 subagent
+
+**详细设计**：[docs/omo-skills-integration.md](omo-skills-integration.md)（含 3 lane 复审反馈、§2.2 修正冲突评级、§3B.7 三段自写 extension 详细设计、§4 风险与缓解按 lane 标注）

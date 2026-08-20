@@ -1,0 +1,38 @@
+{
+  "_comment": "Lane A · 纯 extension 路线 + 英文原版 superpowers。PKGS 14 项（3 内置 + 11 外部：9 npm + 2 git）。差异：superpowers-zh → obra/superpowers。详见 docs/decisions.md §决策 9。",
+
+  "lastChangelogVersion": "0.84.2",
+  "theme": "dark",
+  "defaultProvider": "minimax-cn",
+  "defaultModel": "MiniMax-M3",
+  "defaultThinkingLevel": "medium",
+  "tuiMode": "fullscreen",
+  "hideThinkingBlock": false,
+
+  "extensions": [
+    "pi-system-prompt",
+    "pi-context-view",
+    "pi-context-breakup"
+  ],
+
+  "packages": [
+    "npm:pi-context-view",
+    "npm:pi-system-prompt",
+    "npm:pi-context-breakup",
+
+    "git:github.com/obra/superpowers",
+
+    "git:github.com/nosuiyi/codegraph-pi",
+    "git:github.com/code-yeongyu/pi-lsp-client",
+    "npm:@upstash/context7-pi@latest",
+    "npm:@tintinweb/pi-tasks@latest",
+    "npm:@tintinweb/pi-subagents@latest",
+    "npm:pi-web-access@latest",
+    "npm:pi-mcp-extension@latest",
+    "npm:@mrclrchtr/supi-claude-md@latest",
+    "npm:pi-simplify@latest",
+    "npm:pi-plan-mode@latest"
+  ],
+
+  "trust": true
+}
