@@ -9,7 +9,7 @@
 
 1. **先读 [AGENTS.md](AGENTS.md)**——本文档是给你的引导协议，告诉你要引导用户做哪些决策、如何按 [INSTALL.md](INSTALL.md) 执行安装。
 2. **决策点**：用 [AGENTS.md §3 决策树](AGENTS.md#3-安装步骤始终执行) 引导用户选：
-   - **Lane A 纯 extension**（保留 14 项 PKGS 不变） vs **Lane B 部分 extension + matt skill 微调**（撤冲突项加 omo-skills 25 skill）
+   - **Lane A 纯 extension**（保留 14 项 PKGS 不变） vs **Lane B 部分 extension + matt skill 官方版**（撤冲突项加 mattpocock/skills 25 stable skill）
    - 如果选 Lane A：superpowers 用 **中文版（superpowers-zh）** / **英文原版（obra/superpowers）** / **不装**
 3. **按 [INSTALL.md](INSTALL.md) 执行 6 步安装**——前置检查 / 备份 / cp 用户选定的 settings 模板 / 部署 agents+extensions / 跑 deploy.sh / 验证。
 4. **不要自动执行破坏性操作**——每步前先告知用户，特别是 `cp` 覆盖前 / `rm -rf` 前 / `pi install` 前。
@@ -21,9 +21,9 @@
 | `settings.lane-a.zh.json` | A | 14 | 默认中文工作流（决策 9 历史默认） |
 | `settings.lane-a.en.json` | A | 14 | 英文原版 superpowers 工作流 |
 | `settings.lane-a.bare.json` | A | 13 | 不装 superpowers（用户自己后续装） |
-| `settings.lane-b.json` | B | 13 | 装 omo-skills 25 skill 的微调路线 |
+| `settings.lane-b.json` | B | 13 | 装 mattpocock/skills 25 stable skill 的官方版微调路线 |
 
-**完整设计背景**：[docs/omo-skills-integration.md](docs/omo-skills-integration.md)（3 lane 独立复审后的双路线版）。
+**完整设计背景**：[docs/mattpocock-skills-integration.md](docs/mattpocock-skills-integration.md)（3 lane 独立复审后的双路线版；装载源 = mattpocock/skills 官方版）。
 
 ---
 
@@ -171,7 +171,7 @@ grep -E '(sk-|pplx-|gho_|gsk_|ctx7sk_|key-)' ~/.pi/*.json ~/.pi/agent/*.json \
   && echo "❌ 检出硬编码 key" || echo "✅ 没硬编码 key"
 
 # 确认 git 包是 trusted source
-pi list | grep '^git:'    # 只应出现 2 个：codegraph-pi / pi-lsp-client（superpowers 走 npm）
+pi list | grep '^git:'    # Lane A：2 个（codegraph-pi / pi-lsp-client，superpowers 走 npm）；Lane B：3 个（+ mattpocock/skills）
 ```
 
 ## 参考
